@@ -25,4 +25,8 @@ else(DOXYGEN_FOUND)
     message("Doxygen needs to be installed to generate the documentation.")
 endif(DOXYGEN_FOUND)
 
-add_executable(feup-aed1 app/main.cpp)
+add_executable(feup-aed1 app/main.cpp
+        src/classes/UcClass.cpp
+        src/classes/UcClass.cpp
+        src/classes/Uc.h
+        src/classes/Uc.cpp)
