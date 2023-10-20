@@ -28,8 +28,6 @@ endif(DOXYGEN_FOUND)
 add_executable(feup-aed1 app/main.cpp
         src/classes/UcClass.cpp
         src/classes/UcClass.cpp
-        src/classes/Uc.h
-        src/classes/Uc.cpp
         ../untitled/UcReader.cpp
         ../untitled/UcReader.cpp
 )
