@@ -26,9 +26,14 @@ float UcClass::get_classDuration() const {
 }
 
 bool UcClass::Overlaps(UcClass lesson) const {
-    if(this->dayOfTheWeek_ == lesson.dayOfTheWeek_){
-
+    if (this->dayOfTheWeek_ == lesson.dayOfTheWeek_) {
+        float thisEnd = this->startTime_ + this->classDuration_;
+        float lessonEnd = lesson.startTime_ + lesson.classDuration_;
+        if (this->startTime_ <= lessonEnd && thisEnd >= lesson.startTime_) {
+            return true;
+        }
     }
     return false;
 }
+
 
