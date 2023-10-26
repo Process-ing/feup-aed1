@@ -32,21 +32,21 @@ public:
      * @param classDuration
      * @author Diogo Vieira
      */
-    UcClass(string ucCode, string codeOfClass, vector<Lesson> lessons);
+    UcClass(string uc_code, string code_of_class, vector<Lesson> lessons);
     static string getUcCode();
     static string getCodeOfClass();
     static vector<Lesson> getLessons();
     static int getNumberOfStudents();
     static int getMaxCapacity();
-    static void setNumberOfStudents(int newNumberOfStudents);
-    static void setMaxCapacity(int newMaxCapacity);
+    static void setNumberOfStudents(int new_number_of_students);
+    static void setMaxCapacity(int new_max_capacity);
 
 private:
-    static string ucCode_;
-    static string codeOfClass_;
+    static string uc_code_;
+    static string code_of_class_;
     static vector<Lesson> lessons_;
-    static int numberOfStudents_;
-    static int maxCapacity_;
+    static int number_of_students_;
+    static int max_capacity_;
 };
 
 #endif
