@@ -11,43 +11,43 @@ UcClass::UcClass(string ucCode, string codeOfClass, string dayOfTheWeek, float s
     this->maxCapacity_ = 0;
 }
 
-string UcClass::get_ucCode() const {
+string UcClass::getUcCode() const {
     return ucCode_;
 }
 
-string UcClass::get_codeOfClass() const {
+string UcClass::getCodeOfClass() const {
     return codeOfClass_;
 }
 
-int UcClass::get_numberOfStudents() const {
+int UcClass::getNumberOfStudents() const {
     return numberOfStudents_;
 }
 
-int UcClass::get_maxCapacity() const {
+int UcClass::getMaxCapacity() const {
     return maxCapacity_;
 }
 
-void UcClass::set_maxCapacity(int newMaxCapacity) {
+void UcClass::setMaxCapacity(int newMaxCapacity) {
     maxCapacity_ = newMaxCapacity;
 }
 
-void UcClass::set_numberOfStudents(int newNumberOfStudents) {
+void UcClass::setNumberOfStudents(int newNumberOfStudents) {
     numberOfStudents_ = newNumberOfStudents;
 }
 
-string UcClass::get_dayOfTheWeek() const {
+string UcClass::getDayOfTheWeek() const {
     return this->dayOfTheWeek_;
 }
 
-float UcClass::get_startTime() const {
+float UcClass::getStartTime() const {
     return this->startTime_;
 }
 
-string UcClass::get_classType() const {
+string UcClass::getClassType() const {
     return this->classType_;
 }
 
-float UcClass::get_classDuration() const {
+float UcClass::getClassDuration() const {
     return this->classDuration_;
 }
 
@@ -55,7 +55,7 @@ bool UcClass::Overlaps(UcClass lesson) const {
     if (this->dayOfTheWeek_ == lesson.dayOfTheWeek_) {
         float thisEnd = this->startTime_ + this->classDuration_;
         float lessonEnd = lesson.startTime_ + lesson.classDuration_;
-        if (this->startTisme_ <= lessonEnd && thisEnd >= lesson.startTime_) {
+        if (this->startTime_ <= lessonEnd && thisEnd >= lesson.startTime_) {
             return true;
         }
     }

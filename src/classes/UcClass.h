@@ -1,11 +1,20 @@
 #ifndef UCCLASS_H
 #define UCCLASS_H
 
-
+#include "Lesson.h"
 #include <vector>
 #include <string>
 using namespace std;
-
+/**
+ * @class UcClass
+ * This class represents a university class within a course.
+ * It provides information about the class, such as its code, day of the week, start time,
+ * class type, class duration, and related student capacity.
+ * The class allows for checking whether two classes overlap in terms of their schedules.
+ * It also provides static methods for accessing and modifying class attributes at a class-wide level.
+ *
+ * @author Diogo Vieira
+ */
 class UcClass {
 public:
     /**
@@ -19,62 +28,14 @@ public:
      * @author Diogo Vieira
      */
     UcClass(string ucCode, string codeOfClass, string dayOfTheWeek, float startTime, string classType, float classDuration);
-
-    /**
-     * @brief ucCode getter
-     * @return ucCode
-     * @author Diogo Vieira
-     */
-    string get_ucCode() const;
-
-    /**
-     * @brief codeOfClass getter
-     * @return codeOfClass
-     * @author Diogo Vieira
-     */
-    string get_codeOfClass() const;
-
-    /**
-     * @brief dayOfTheWeek getter
-     * @return dayOfTheWeek
-     * @author Diogo Vieira
-     */
-    string get_dayOfTheWeek() const;
-
-    /**
-     * @brief classType getter
-     * @return classType
-     * @author Diogo Vieira
-     */
-    string get_classType() const;
-
-    /**
-     * @brief startTime getter
-     * @return startTime
-     * @author Diogo Vieira
-     */
-    float get_startTime() const;
-
-    /**
-     * @brief classDuration getter
-     * @return classDuration
-     * @author Diogo Vieira
-     */
-    float get_classDuration() const;
-
-    /**
-     * @brief numberOfStudents getter
-     * @return numberOfStudents
-     * @author Diogo Vieira
-     */
-    int get_numberOfStudents() const;
-
-    /**
-     * @brief maxCapacity getter
-     * @return maxCapacity
-     * @author Diogo Vieira
-     */
-    int get_maxCapacity() const;
+    static string getUcCode();
+    static string getCodeOfClass();
+    static string getDayOfTheWeek();
+    static string getClassType();
+    static float getStartTime();
+    static float getClassDuration();
+    static int getNumberOfStudents();
+    static int getMaxCapacity();
 
     /**
      * @brief Checks if two lessons overlap
@@ -83,20 +44,8 @@ public:
      * @author Diogo Vieira
      */
     bool Overlaps(UcClass lesson) const;
-
-    /**
-     * @brief numberOfStudents establishment
-     * @param newNumberOfStudents
-     * @author Diogo Vieira
-     */
-    void set_numberOfStudents(int newNumberOfStudents);
-
-    /**
-     * @brief maxCapacity establishment
-     * @param newMaxCapacity
-     * @author Diogo Vieira
-     */
-    void set_maxCapacity(int newMaxCapacity);
+    static void setnumberOfStudents(int newNumberOfStudents);
+    static void setmaxCapacity(int newMaxCapacity);
 
 private:
     string ucCode_;
@@ -104,9 +53,10 @@ private:
     string dayOfTheWeek_;
     float startTime_;
     string classType_;
+    vector<Lesson> lessons_;
     float classDuration_;
     int numberOfStudents_;
-    int maxCapacity_;
+    static int maxCapacity_;
 };
 
 #endif

@@ -61,12 +61,6 @@ build CMakeFiles/feup-aed1.dir/src/classes/UcClass.cpp.obj: CXX_COMPILER__feup-a
   OBJECT_DIR = CMakeFiles\feup-aed1.dir
   OBJECT_FILE_DIR = CMakeFiles\feup-aed1.dir\src\classes
 
-build CMakeFiles/feup-aed1.dir/src/classes/Uc.cpp.obj: CXX_COMPILER__feup-aed1_unscanned_Debug C$:/Users/HP/CLionProjects/feup-aed1/src/classes/Uc.cpp || cmake_object_order_depends_target_feup-aed1
-  DEP_FILE = CMakeFiles\feup-aed1.dir\src\classes\Uc.cpp.obj.d
-  FLAGS = -g -std=gnu++11 -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\feup-aed1.dir
-  OBJECT_FILE_DIR = CMakeFiles\feup-aed1.dir\src\classes
-
 build CMakeFiles/feup-aed1.dir/C_/Users/HP/CLionProjects/untitled/UcReader.cpp.obj: CXX_COMPILER__feup-aed1_unscanned_Debug C$:/Users/HP/CLionProjects/untitled/UcReader.cpp || cmake_object_order_depends_target_feup-aed1
   DEP_FILE = CMakeFiles\feup-aed1.dir\C_\Users\HP\CLionProjects\untitled\UcReader.cpp.obj.d
   FLAGS = -g -std=gnu++11 -fdiagnostics-color=always
@@ -81,7 +75,7 @@ build CMakeFiles/feup-aed1.dir/C_/Users/HP/CLionProjects/untitled/UcReader.cpp.o
 #############################################
 # Link the executable feup-aed1.exe
 
-build feup-aed1.exe: CXX_EXECUTABLE_LINKER__feup-aed1_Debug CMakeFiles/feup-aed1.dir/app/main.cpp.obj CMakeFiles/feup-aed1.dir/src/classes/UcClass.cpp.obj CMakeFiles/feup-aed1.dir/src/classes/Uc.cpp.obj CMakeFiles/feup-aed1.dir/C_/Users/HP/CLionProjects/untitled/UcReader.cpp.obj
+build feup-aed1.exe: CXX_EXECUTABLE_LINKER__feup-aed1_Debug CMakeFiles/feup-aed1.dir/app/main.cpp.obj CMakeFiles/feup-aed1.dir/src/classes/UcClass.cpp.obj CMakeFiles/feup-aed1.dir/C_/Users/HP/CLionProjects/untitled/UcReader.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\feup-aed1.dir
