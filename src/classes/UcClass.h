@@ -18,6 +18,11 @@ using namespace std;
 class UcClass {
 public:
     /**
+     * Default constructor for UcClass
+     * @author Diogo Vieira
+     * /
+    UcClass();
+    /**
      * Parameterized constructor for UcClass
      * @param ucCode
      * @param codeOfClass
@@ -27,35 +32,20 @@ public:
      * @param classDuration
      * @author Diogo Vieira
      */
-    UcClass(string ucCode, string codeOfClass, string dayOfTheWeek, float startTime, string classType, float classDuration);
+    UcClass(string ucCode, string codeOfClass, vector<Lesson> lessons);
     static string getUcCode();
     static string getCodeOfClass();
-    static string getDayOfTheWeek();
-    static string getClassType();
-    static float getStartTime();
-    static float getClassDuration();
+    static vector<Lesson> getLessons();
     static int getNumberOfStudents();
     static int getMaxCapacity();
-
-    /**
-     * @brief Checks if two lessons overlap
-     * @param lesson
-     * @return true if two lessons overlap, false if they don't
-     * @author Diogo Vieira
-     */
-    bool Overlaps(UcClass lesson) const;
-    static void setnumberOfStudents(int newNumberOfStudents);
-    static void setmaxCapacity(int newMaxCapacity);
+    static void setNumberOfStudents(int newNumberOfStudents);
+    static void setMaxCapacity(int newMaxCapacity);
 
 private:
-    string ucCode_;
-    string codeOfClass_;
-    string dayOfTheWeek_;
-    float startTime_;
-    string classType_;
-    vector<Lesson> lessons_;
-    float classDuration_;
-    int numberOfStudents_;
+    static string ucCode_;
+    static string codeOfClass_;
+    static vector<Lesson> lessons_;
+    static int numberOfStudents_;
     static int maxCapacity_;
 };
 
