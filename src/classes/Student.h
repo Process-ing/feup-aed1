@@ -1,10 +1,9 @@
-//
-// Created by memechanic on 18-10-2023.
-//
+/**
+ * Header file for class Student.
+ */
 
 #ifndef FEUP_AED1_STUDENT_H
 #define FEUP_AED1_STUDENT_H
-#include "Lesson.h"
 #include <list>
 #include <string>
 
@@ -13,21 +12,21 @@ class Student {
 private:
     int StudentCode_;
     std::string StudentName_;
-    std::string UcCode_;
-    std::string ClassCode_;
-    std::list<Lesson> lessons;
+    std::list<std::string> UcClasses_;
 public:
-    Student(int StudentCode, std::string StudentName, std::string UcCode, std::string ClassCode);
+    /**
+     * @brief Constructor of the class.
+     * @author João Mendes
+     * @param StudentCode Represents the student's code.
+     * @param StudentName Represents the student's name.
+     */
+    Student(int StudentCode, std::string StudentName);
+
 
     int getStudentCode() const;
     std::string getStudentName() const;
-    std::string getUcCode() const;
-    std::string getClassCode() const;
-
-    void setStudentCode(int StudentCode);
-    void setStudentName(std::string StudentName);
-    void setUcCode(std::string UcCode);
-    void setClassCode(std::string ClassCode);
+    std::list<std::string> &getUcClasses();
+    const std::list<std::string> &getUcClasses() const;
 };
 
 #endif //FEUP_AED1_STUDENT_H
