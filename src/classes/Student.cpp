@@ -1,14 +1,14 @@
 #include "Student.h"
 
-Student::Student(int StudentCode, std::string StudentName) {
-    StudentCode_ = StudentCode;
-    StudentName_ = StudentName;
+Student::Student(int student_code, const std::string &student_name) {
+    student_code_ = student_code;
+    student_name_ = student_name;
 }
 
-int Student::getStudentCode() const { return StudentCode_; }
+int Student::getStudentCode() const { return student_code_; }
 
-std::string Student::getStudentName() const { return StudentName_; }
+std::string Student::getStudentName() const { return student_name_; }
 
-std::list<std::string> &Student::getUcClasses() { return UcClasses_; }
+std::list<UcClass*> &Student::getUcClasses() { return uc_classes_; }
 
-const std::list<std::string> &Student::getUcClasses() const { return UcClasses_; }
+const std::list<UcClass*> &Student::getUcClasses() const { return uc_classes_; }

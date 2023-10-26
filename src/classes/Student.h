@@ -4,29 +4,30 @@
 
 #ifndef FEUP_AED1_STUDENT_H
 #define FEUP_AED1_STUDENT_H
+#include "UcClass.h"
 #include <list>
 #include <string>
 
 
 class Student {
 private:
-    int StudentCode_;
-    std::string StudentName_;
-    std::list<std::string> UcClasses_;
+    int student_code_;
+    std::string student_name_;
+    std::list<UcClass*> uc_classes_;
 public:
     /**
      * @brief Constructor of the class.
      * @author João Mendes
-     * @param StudentCode Represents the student's code.
-     * @param StudentName Represents the student's name.
+     * @param student_code Represents the student's code.
+     * @param student_name Represents the student's name.
      */
-    Student(int StudentCode, std::string StudentName);
+    Student(int student_code, const std::string &student_name);
 
 
     int getStudentCode() const;
     std::string getStudentName() const;
-    std::list<std::string> &getUcClasses();
-    const std::list<std::string> &getUcClasses() const;
+    std::list<UcClass*> &getUcClasses();
+    const std::list<UcClass*> &getUcClasses() const;
 };
 
 #endif //FEUP_AED1_STUDENT_H
