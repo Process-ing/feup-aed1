@@ -15,10 +15,6 @@
  */
 class Dataset {
   public:
-    /**
-     * @brief Default constructor.
-     * @author Bruno Oliveira
-     */
     Dataset();
 
     const std::set<Student>& getStudents();
