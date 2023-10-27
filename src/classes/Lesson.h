@@ -4,7 +4,6 @@
 
 #ifndef FEUP_AED1_LESSON_H
 #define FEUP_AED1_LESSON_H
-#include <utility>
 
 
 class Lesson {
@@ -27,20 +26,10 @@ public:
      * @param end Represents the end hour.
      * @param type Represents what type of lesson it is.
      */
-    Lesson(std::pair<int, int> start, std::pair<int, int> end, Type type, Weekday weekday);
-    /**
-     * @brief Returns a pair of ints representing the start hour.
-     * @author João Mendes
-     * @return Pair of ints, with the first representing the hour and the second representing the minutes.
-     */
-    std::pair<int, int> getStart() const;
-    /**
-     * @brief Returns a pair of ints representing the start hour.
-     * @author João Mendes
-     * @return Pair of ints, with the first representing the hour and the second representing the minutes.
-     */
-    std::pair<int, int> getEnd() const;
+    Lesson(double start, double end, Type type, Weekday weekday);
 
+    double getStart() const;
+    double getEnd() const;
     Type getType() const;
     Weekday getWeekday() const;
     /**
@@ -48,16 +37,16 @@ public:
      * @author João Mendes
      * @param lesson Lesson to compare
      */
-    bool operator<(const Lesson &lesson);
+    bool operator<(const Lesson &lesson) const;
     /**
      * @brief Returns whether the current lesson overlaps with the given lesson.
      * @author João Mendes
      * @param lesson Lesson to compare
      */
-    bool overlaps(const Lesson &lesson);
+    bool overlaps(const Lesson &lesson) const;
 private:
-    std::pair<int, int> start_;
-    std::pair<int, int> end_;
+    double start_;
+    double end_;
     Type type_;
     Weekday weekday_;
 };
