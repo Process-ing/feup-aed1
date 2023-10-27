@@ -30,4 +30,7 @@ add_executable(feup-aed1 app/main.cpp
         src/classes/UcClass.cpp
         ../untitled/UcReader.cpp
         ../untitled/UcReader.cpp
+        src/classes/Lesson.h
+        src/classes/Dataset.h
+        src/classes/Dataset.cpp
 )

@@ -20,8 +20,9 @@ public:
     /**
      * Default constructor for UcClass
      * @author Diogo Vieira
-     * /
-    UcClass();
+     */
+
+     UcClass();
     /**
      * Parameterized constructor for UcClass
      * @param ucCode
@@ -40,7 +41,14 @@ public:
     static int getMaxCapacity();
     static void setNumberOfStudents(int new_number_of_students);
     static void setMaxCapacity(int new_max_capacity);
-
+    /**
+    * @brief Add a Lesson to this UcClass.
+    * Adds a Lesson to the collection of lessons associated with this UcClass.
+    * @param lesson The Lesson to be added to this UcClass.
+    * @author Diogo Vieira
+    */
+    void addLesson(Lesson lesson);
+    bool operator<(const UcClass& other) const;
 private:
     static string uc_code_;
     static string code_of_class_;
