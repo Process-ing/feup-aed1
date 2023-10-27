@@ -17,8 +17,8 @@ class Dataset {
   public:
     Dataset();
 
-    const std::set<Student>& getStudents();
-    const std::set<UcClass>& getUcClasses();
+    const std::set<Student>& getStudents() const;
+    const std::set<UcClass>& getUcClasses() const;
 
   private:
     std::set<Student> students;
