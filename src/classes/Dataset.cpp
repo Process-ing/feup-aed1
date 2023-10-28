@@ -8,11 +8,11 @@ using namespace std;
 
 Dataset::Dataset() = default;
 
-const set<Student>& Dataset::getStudents() {
+const set<Student>& Dataset::getStudents() const {
     return students;
 }
 
-const set<UcClass>& Dataset::getUcClasses() {
+const set<UcClass>& Dataset::getUcClasses() const {
     return ucClasses;
 }
 
