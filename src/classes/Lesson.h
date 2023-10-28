@@ -1,8 +1,7 @@
-#include <string>
-
 #ifndef FEUP_AED1_LESSON_H
 #define FEUP_AED1_LESSON_H
 
+#include <string>
 
 class Lesson {
 public:
