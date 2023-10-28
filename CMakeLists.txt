@@ -11,9 +11,34 @@ if(DOXYGEN_FOUND)
         file(MAKE_DIRECTORY "${BUILD_DOC_DIR}")
     endif()
 
+<<<<<<< Updated upstream
     set(DOXYGEN_IN "${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile")
     set(DOXYGEN_OUT "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
     configure_file("${DOXYGEN_IN}" "${DOXYGEN_OUT}" @ONLY)
+=======
+add_executable(feup-aed1 main.cpp
+        src/classes/Request.cpp
+        src/classes/Request.h
+        src/classes/UcClass.h
+        src/classes/Dataset.cpp
+        src/classes/Dataset.h
+        src/classes/Student.h
+        src/classes/Lesson.cpp
+        src/classes/Lesson.cpp
+        src/classes/Lesson.cpp
+        src/classes/Lesson.cpp
+        src/classes/Lesson.cpp
+        src/classes/Lesson.cpp
+        src/classes/Lesson.cpp
+        src/classes/Lesson.cpp
+        src/classes/Lesson.cpp
+        src/classes/Student.cpp
+        src/classes/Student.cpp
+        src/classes/Student.cpp
+        src/classes/Student.cpp
+        src/classes/Student.cpp
+)
+>>>>>>> Stashed changes
 
     message("Doxygen build started")
     add_custom_target(Doxygen ALL

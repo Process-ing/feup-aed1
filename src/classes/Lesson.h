@@ -1,7 +1,10 @@
+/**
+ * Header file for class Lesson.
+ */
+
 #ifndef FEUP_AED1_LESSON_H
 #define FEUP_AED1_LESSON_H
 
-#include <string>
 
 class Lesson {
 public:
@@ -23,7 +26,7 @@ public:
      * @param end Represents the end hour.
      * @param type Represents what type of lesson it is.
      */
-    Lesson(double start, double end, std::__cxx11::basic_string<char> type, std::basic_string<char> weekday);
+    Lesson(double start, double end, Type type, Weekday weekday);
 
     double getStart() const;
     double getEnd() const;
@@ -47,3 +50,5 @@ private:
     Type type_;
     Weekday weekday_;
 };
+
+#endif //FEUP_AED1_LESSON_H
