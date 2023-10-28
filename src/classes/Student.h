@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * Header file for class Student.
  */

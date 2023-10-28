@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 //
 // Created by memechanic on 20-10-2023.
 //
