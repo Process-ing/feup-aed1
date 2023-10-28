@@ -5,13 +5,13 @@
 class Dataset {
 public:
     /**
-     * Reads UcClass data from a file and populates the dataset.
+     * Reads Uc data from a file and populates the dataset.
      * @author Diogo Vieira
      */
-    void UcsReader();
+    void UcReader();
 
     /**
-     * Reads UcClass data from a file and populates the dataset.
+     * Reads UcClasses data from a file and populates the dataset.
      * @author Diogo Vieira
      */
     void UcClassReader();
@@ -27,7 +27,7 @@ public:
     UcClass findUcClass(string uc_code, string code_of_class);
 
 private:
-    vector<UcClass> all_classes; ///< A vector containing all UcClass objects in the dataset.
+    vector<UcClass> all_classes;
 };
 
 #endif //FEUP_AED1_DATASET_H

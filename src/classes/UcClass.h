@@ -48,6 +48,13 @@ public:
     * @author Diogo Vieira
     */
     void addLesson(Lesson lesson);
+    /**
+    * @brief Less-than comparison operator for UcClass objects.
+    * This operator overloads the '<' operator to compare two UcClass objects based on their `uc_code_` member variable.
+    * @param other The UcClass object to compare with.
+    * @return True if this UcClass's `uc_code_` is less than the `uc_code_` of the other UcClass, false otherwise.
+    * @author Diogo Vieira
+    */
     bool operator<(const UcClass& other) const;
 private:
     static string uc_code_;

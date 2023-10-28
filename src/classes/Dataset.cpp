@@ -9,7 +9,7 @@
 #include <set>
 using namespace std;
 
-void Dataset::UcsReader() {
+void Dataset::UcReader() {
     vector<UcClass> ucClasses;
     set<UcClass> temporary;
     ifstream ucClassFile("../files/classes.csv");
