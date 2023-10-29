@@ -20,13 +20,14 @@ void Menu::launch() const {
         EXIT = 5,
     };
 
+    ifstream welcome_screen_file(WELCOME_SCREEN_FILEPATH);
+    if (welcome_screen_file.fail()) {
+        ostringstream error_msg;
+        error_msg << "cannot read menu file \"" << WELCOME_SCREEN_FILEPATH << "\".";
+        throw ios_base::failure(error_msg.str());
+    }
+
     while (true) {
-        ifstream welcome_screen_file(WELCOME_SCREEN_FILEPATH);
-        if (welcome_screen_file.fail()) {
-            ostringstream error_msg;
-            error_msg << "cannot read menu file \"" << WELCOME_SCREEN_FILEPATH << "\".";
-            throw ios_base::failure(error_msg.str());
-        }
         cout << welcome_screen_file.rdbuf();
 
         switch (receiveOption(NUM_OPTIONS)) {
@@ -38,6 +39,8 @@ void Menu::launch() const {
                 waitForEnter();
                 return;
         }
+
+        welcome_screen_file.seekg(0);
     }
 }
 
@@ -68,9 +71,26 @@ void Menu::searchMenu() const {
     cout << search_menu_file.rdbuf();
 
     switch (receiveOption(NUM_OPTIONS)) {
+        case Option::ALL_STUDENTS:
+            sortMenu();
         case Option::GO_BACK:
             return;
     }
+}
+
+Menu::SortOption Menu::sortMenu() {
+    const static string SORT_MENU_FILEPATH = "src/menus/sort_menu.txt";
+    const static int NUM_OPTIONS = 4;
+
+    ifstream sort_menu_file(SORT_MENU_FILEPATH);
+    if (sort_menu_file.fail()) {
+        ostringstream error_msg;
+        error_msg << "cannot read menu file \"" << SORT_MENU_FILEPATH << "\".";
+        throw ios_base::failure(error_msg.str());
+    }
+
+    cout << sort_menu_file.rdbuf();
+    return (SortOption) receiveOption(NUM_OPTIONS);
 }
 
 int Menu::receiveOption(int max) {

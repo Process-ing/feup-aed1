@@ -21,8 +21,8 @@ class Dataset {
     const std::set<UcClass>& getUcClasses() const;
 
   private:
-    std::set<Student> students;
-    std::set<UcClass> ucClasses;
+    std::set<Student> students_;
+    std::set<UcClass> uc_classes_;
 };
 
 

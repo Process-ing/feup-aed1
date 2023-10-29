@@ -9,11 +9,9 @@ using namespace std;
 Dataset::Dataset() = default;
 
 const set<Student>& Dataset::getStudents() const {
-    return students;
+    return students_;
 }
 
 const set<UcClass>& Dataset::getUcClasses() const {
-    return ucClasses;
+    return uc_classes_;
 }
-
-
