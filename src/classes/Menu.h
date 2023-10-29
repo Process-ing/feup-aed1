@@ -13,6 +13,8 @@ class Menu {
   private:
     Dataset &dataset_;
 
+    void searchMenu() const;
+
     static int receiveOption(int max);
     static void waitForEnter();
 };

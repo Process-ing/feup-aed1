@@ -10,20 +10,65 @@ using namespace std;
 Menu::Menu(Dataset& dataset) : dataset_(dataset) {}
 
 void Menu::launch() const {
-    const string WELCOME_SCREEN_PATH = "../src/menus/welcome_screen.txt";
-    ifstream welcome_screen_file(WELCOME_SCREEN_PATH);
-    if (welcome_screen_file.fail()) {
+    const static string WELCOME_SCREEN_FILEPATH = "src/menus/welcome_screen.txt";
+    const static int NUM_OPTIONS = 5;
+    enum Option {
+        SEARCH = 1,
+        SCHEDULE = 2,
+        REQUEST = 3,
+        SAVE = 4,
+        EXIT = 5,
+    };
+
+    while (true) {
+        ifstream welcome_screen_file(WELCOME_SCREEN_FILEPATH);
+        if (welcome_screen_file.fail()) {
+            ostringstream error_msg;
+            error_msg << "cannot read menu file \"" << WELCOME_SCREEN_FILEPATH << "\".";
+            throw ios_base::failure(error_msg.str());
+        }
+        cout << welcome_screen_file.rdbuf();
+
+        switch (receiveOption(NUM_OPTIONS)) {
+            case Option::SEARCH:
+                searchMenu();
+                break;
+            case Option::EXIT:
+                cout << "Exiting the app. ";
+                waitForEnter();
+                return;
+        }
+    }
+}
+
+void Menu::searchMenu() const {
+    const static string SEARCH_MENU_FILEPATH = "src/menus/search_menu.txt";
+    const static int NUM_OPTIONS = 11;
+    enum Option {
+        ALL_STUDENTS = 1,
+        ALL_UCS = 2,
+        ALL_CLASSES = 3,
+        STUDENT_CODE = 4,
+        STUDENTS_UC = 5,
+        STUDENTS_CLASS = 6,
+        STUDENTS_UC_CLASS = 7,
+        STUDENTS_ACADEMIC_YEAR = 8,
+        STUDENTS_ADMISSION_YEAR = 9,
+        STUDENTS_N_UCS = 10,
+        GO_BACK = 11,
+    };
+
+    ifstream search_menu_file(SEARCH_MENU_FILEPATH);
+    if (search_menu_file.fail()) {
         ostringstream error_msg;
-        error_msg << "cannot read menu file \"" << WELCOME_SCREEN_PATH << "\".";
+        error_msg << "cannot read menu file \"" << SEARCH_MENU_FILEPATH << "\".";
         throw ios_base::failure(error_msg.str());
     }
 
-    cout << welcome_screen_file.rdbuf();
+    cout << search_menu_file.rdbuf();
 
-    switch (receiveOption(6)) {
-        case 6:
-            cout << "Exiting the app. ";
-            waitForEnter();
+    switch (receiveOption(NUM_OPTIONS)) {
+        case Option::GO_BACK:
             return;
     }
 }
