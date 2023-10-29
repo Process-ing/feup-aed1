@@ -4,10 +4,21 @@
 #include <string>
 #include "Dataset.h"
 
+/**
+ * @brief Object responsible for all project's UI/UX.
+ * @details It makes all the calls to the dataset, based on the user's input.
+ */
 class Menu {
   public:
+    /**
+     * @brief Constructor of the class.
+     * @param dataset Dataset for the menu to use.
+     */
     explicit Menu(Dataset& dataset);
 
+    /**
+     * @brief Launches the menu, starting on the welcome screen.
+     */
     void launch() const;
 
   private:

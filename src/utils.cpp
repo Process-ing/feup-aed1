@@ -1,7 +1,3 @@
-//
-// Created by bruno on 10/29/23.
-//
-
 #include <algorithm>
 #include "utils.h"
 
