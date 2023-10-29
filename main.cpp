@@ -10,7 +10,8 @@
 using namespace std;
 
 int main() {
-    Menu menu;
+    Dataset dataset;
+    Menu menu(dataset);
 
     try {
         menu.launch();
