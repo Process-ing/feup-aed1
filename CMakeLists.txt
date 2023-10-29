@@ -15,6 +15,8 @@ add_executable(feup-aed1 main.cpp
         src/classes/Lesson.h
         src/classes/UcClass.h
         src/classes/Lesson.cpp
+        src/classes/Menu.cpp
+        src/classes/Menu.h
 )
 
 add_subdirectory(docs)
