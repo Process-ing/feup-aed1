@@ -9,7 +9,6 @@
 #include <fstream>
 #include <map>
 #include <set>
-
 using namespace std;
 
 Dataset::Dataset() = default;
@@ -90,10 +89,10 @@ void Dataset::UcClassReader() {
     }
 }
 
-UcClass Dataset::findUcClass(string uc_code, string code_of_class) {
+UcClass Dataset::findUcClass(const string& uc_code, const string& code_of_class) {
     UcClass tempUcClass(uc_code, code_of_class, vector<Lesson>());
     for (const UcClass& ucClass : all_classes) {
-        if (ucClass.getUcCode() == uc_code && ucClass.getCodeOfClass() == code_of_class) {
+        if (ucClass.getUcCode() == uc_code && ucClass.getClassCode() == code_of_class) {
             return ucClass;
         }
     }
@@ -139,7 +138,7 @@ vector<Student> Dataset::searchStudentsByUcClass(const UcClass& uc_class) const 
         }
     }
     if (students_in_class.empty()) {
-        cout << "No students enrolled in the UC class: " << uc_class.getCodeOfClass() << endl;
+        cout << "No students enrolled in the UC class: " << uc_class.getClassCode() << endl;
     }
     return students_in_class;
 }

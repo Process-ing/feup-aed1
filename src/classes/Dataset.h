@@ -33,7 +33,7 @@ public:
      * @param code_of_class The class code of the UcClass to find.
      * @return The found UcClass, or an empty one if not found.
      */
-    UcClass findUcClass(string uc_code, string code_of_class);
+    UcClass findUcClass(const std::string& uc_code, const std::string& code_of_class);
 
     /**
      * Searches for students in the dataset based on their admission year.
@@ -57,7 +57,7 @@ public:
      * @param n The minimum number of UCs a student must be enrolled in to be included in the result.
      * @return A vector of students who are enrolled in at least 'n' UCs.
      */
-    vector<Student> searchStudentsInAtLeastNUCs(int n) const;
+    std::vector<Student> searchStudentsInAtLeastNUCs(int n) const;
 
     /**
      * Searches for a student in the dataset by their student code.
@@ -65,7 +65,7 @@ public:
      * @param student_code The student code to search for.
      * @return A vector containing the found student(s) with the given code, which may be empty if no student matches the code.
      */
-    vector<Student> searchStudentsByCode(int student_code) const;
+    std::vector<Student> searchStudentsByCode(int student_code) const;
 
     /**
      * Searches for students enrolled in a specific UC by its unique code.
@@ -73,7 +73,7 @@ public:
      * @param uc_code The unique code of the UC to search for.
      * @return A vector containing the students enrolled in the specified UC, which may be empty if no students are found.
      */
-    vector<Student> searchStudentsInUC(string uc_code) const;
+    std::vector<Student> searchStudentsInUC(const std::string& uc_code) const;
 
     /**
      * Searches for students enrolled in a specific class by its class code.
@@ -81,12 +81,12 @@ public:
      * @param classCode The code of the class to search for.
      * @return A vector containing the students enrolled in the specified class, which may be empty if no students are found.
      */
-    vector<Student> searchStudentsInClass(string code_of_class) const;
+    std::vector<Student> searchStudentsInClass(const std::string& class_code) const;
 
 private:
     std::set<Student> students;
     std::set<UcClass> ucClasses;
-    vector<UcClass> all_classes;
+    std::vector<UcClass> all_classes;
 };
 
 #endif //FEUP_AED1_DATASET_H
