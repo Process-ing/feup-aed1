@@ -41,7 +41,7 @@ public:
      * @param year The year to search for in student registration codes.
      * @return A vector of students whose admission year matches the specified year.
      */
-    vector<Student> searchStudentsByAdmissionYear(int year) const;
+    std::vector<Student> searchStudentsByAdmissionYear(int year) const;
 
     /**
      * Searches for students in the dataset who are enrolled in a specific UC class.
@@ -49,7 +49,7 @@ public:
      * @param uc_class The UC class to search for.
      * @return A vector of students who are enrolled in the specified UC class.
      */
-    vector<Student> searchStudentsByUcClass(UcClass& uc_class) const;
+    std::vector<Student> searchStudentsByUcClass(const UcClass& uc_class) const;
 
     /**
      * Searches for students in the dataset who are enrolled in at least 'n' UCs.

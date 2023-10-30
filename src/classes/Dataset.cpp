@@ -61,7 +61,7 @@ void Dataset::UcClassReader() {
         getline(ss, weekday_str, ',');
         getline(ss, start, ',');
         getline(ss, duration, ',');
-        getline(ss, type, '\r');
+        getline(ss, type);
         Lesson::Type lesson_type;
         if (type == "T") {
             lesson_type = Lesson::T;
@@ -131,7 +131,7 @@ vector<Student> Dataset::searchStudentsByCode(int student_code) const {
     return the_student;
 }
 
-vector<Student> Dataset::searchStudentsByUcClass(UcClass& uc_class) const {
+vector<Student> Dataset::searchStudentsByUcClass(const UcClass& uc_class) const {
     vector<Student> students_in_class;
     for (const Student& student : students) {
         if (student.hasClass(uc_class)) {
@@ -157,7 +157,7 @@ vector<Student> Dataset::searchStudentsInAtLeastNUCs(int n) const {
     return students_in_at_least_n_ucs;
 }
 
-vector<Student> Dataset::searchStudentsInUC(string uc_code) const {
+vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
     vector<Student> students_in_uc;
     for (const Student& student : students) {
         for (UcClass* ucClass : student.getUcClasses()) {
@@ -173,18 +173,18 @@ vector<Student> Dataset::searchStudentsInUC(string uc_code) const {
     return students_in_uc;
 }
 
-vector<Student> Dataset::searchStudentsInClass(string code_of_class) const {
+vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
     vector<Student> students_in_class;
     for (const Student &student: students) {
         for (const UcClass *ucClass: student.getUcClasses()) {
-            if (ucClass->getCodeOfClass() == code_of_class) {
+            if (ucClass->getClassCode() == class_code) {
                 students_in_class.push_back(student);
                 break;
             }
         }
     }
     if (students_in_class.empty()) {
-        cout << "No students enrolled in class: " << code_of_class << endl;
+        cout << "No students enrolled in class: " << class_code << endl;
     }
     return students_in_class;
 }

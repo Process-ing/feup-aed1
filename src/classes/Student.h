@@ -14,6 +14,7 @@ private:
     int student_code_;
     std::string student_name_;
     std::list<UcClass*> uc_classes_;
+    int max_class_capacity_ = 0;
 public:
     /**
      * @brief Constructor of the class.
