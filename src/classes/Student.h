@@ -7,13 +7,15 @@
 #include "UcClass.h"
 #include <list>
 #include <string>
+#include <set>
 
+typedef std::set<UcClass>::const_iterator UcClassRef;
 
 class Student {
 private:
     int student_code_;
     std::string student_name_;
-    std::list<UcClass*> uc_classes_;
+    std::list<UcClassRef> uc_classes_;
     int max_class_capacity_ = 0;
 public:
     /**
@@ -27,8 +29,8 @@ public:
 
     int getStudentCode() const;
     std::string getStudentName() const;
-    std::list<UcClass*> &getUcClasses();
-    const std::list<UcClass*> &getUcClasses() const;
+    std::list<UcClassRef> &getUcClasses();
+    const std::list<UcClassRef> &getUcClasses() const;
     bool hasClass(const UcClass& uc_class) const;
 };
 

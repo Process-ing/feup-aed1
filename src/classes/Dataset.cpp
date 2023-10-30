@@ -9,11 +9,12 @@
 #include <fstream>
 #include <map>
 #include <set>
+#include <unordered_map>
+
 using namespace std;
 
 Dataset::Dataset(){
-    UcReader();
-    UcClassReader();
+    readFiles();
 }
 
 const set<Student>& Dataset::getStudents() const {
@@ -24,81 +25,80 @@ const set<UcClass>& Dataset::getUcClasses() const {
     return uc_classes_;
 }
 
-void Dataset::UcReader() {
-    static const string CLASSES_FILEPATH = "files/classes.csv";
-    ifstream classes_file(CLASSES_FILEPATH);
-    if (!classes_file.is_open()) {
+void Dataset::readFiles() {
+    map<UcClass, vector<Lesson>> uc_classes_lessons;
+    readUcs(uc_classes_lessons);
+    readClasses(uc_classes_lessons);
+    for (const auto& uc_class_lessons: uc_classes_lessons)
+        uc_classes_.insert(UcClass(
+            uc_class_lessons.first.getUcCode(),
+            uc_class_lessons.first.getClassCode(),
+            uc_class_lessons.second
+        ));
+}
+
+void Dataset::readUcs(map<UcClass, vector<Lesson>>& uc_classes_lessons) {
+    static const string CLASSES_PER_UC_FILEPATH = "dataset/classes_per_uc.csv";
+    ifstream classes_per_uc_file(CLASSES_PER_UC_FILEPATH);
+    if (classes_per_uc_file.fail()) {
         ostringstream error_msg;
-        error_msg << "Could not open file \"" << CLASSES_FILEPATH << '"';
+        error_msg << "Could not open file \"" << CLASSES_PER_UC_FILEPATH << '"';
         throw ios_base::failure(error_msg.str());
     }
-    string line, uc_code, code_of_class;
-    getline(classes_file, line);
-    while (getline(classes_file, code_of_class, ',')) {
-        getline(classes_file, uc_code, ',');
-        uc_classes_.insert(UcClass(uc_code, code_of_class));
+    string line, uc_code, class_code;
+    getline(classes_per_uc_file, line);
+    while (getline(classes_per_uc_file, uc_code, ',')) {
+        getline(classes_per_uc_file, class_code);
+        uc_classes_lessons.emplace(UcClass(uc_code, class_code), vector<Lesson>());
     }
 }
 
-void Dataset::UcClassReader() {
-    static const string CLASSES_FILEPATH = "files/classes.csv";
-    ifstream classes_file("../files/classes.csv");
-    if (!classes_file.is_open()) {
+void Dataset::readClasses(map<UcClass, vector<Lesson>>& uc_classes_lessons) {
+    static const string CLASSES_FILEPATH = "dataset/classes.csv";
+    static const unordered_map<string, Lesson::Type> STR_TO_TYPE = {
+            { "T", Lesson::T }, { "TP", Lesson::TP }, { "PL", Lesson::PL },
+    };
+    static const unordered_map<string, Lesson::Weekday> STR_TO_WEEKDAY = {
+            {"Monday", Lesson::MONDAY}, {"Tuesday", Lesson::TUESDAY}, {"Wednesday", Lesson::WEDNESDAY},
+            {"Thursday", Lesson::THURSDAY}, {"Friday", Lesson::FRIDAY}, {"Saturday", Lesson::SATURDAY}
+    };
+    ifstream classes_file(CLASSES_FILEPATH);
+    if (classes_file.fail()) {
         ostringstream error_msg;
         error_msg << "Could not open the file \"" << CLASSES_FILEPATH << endl;
         throw ios_base::failure(error_msg.str());
     }
-    string line, code_of_class, uc_code, weekday_str, start, duration, type;
+    string line, class_code, uc_code, weekday_str, start, duration, type;
     vector<Lesson> lessons;
 
     getline(classes_file, line);
-    while (getline(classes_file, line)) {
-        stringstream ss(line);
-        getline(ss, code_of_class, ',');
-        getline(ss, uc_code, ',');
-        getline(ss, weekday_str, ',');
-        getline(ss, start, ',');
-        getline(ss, duration, ',');
-        getline(ss, type);
-        Lesson::Type lesson_type;
-        if (type == "T") {
-            lesson_type = Lesson::T;
-        } else if (type == "TP")
-            lesson_type = Lesson::TP;
-        else if (type == "PL") {
-            lesson_type = Lesson::PL;
-        }
-        Lesson::Weekday weekday;
-        if (weekday_str == "Monday") {
-            weekday = Lesson::Monday;
-        } else if (weekday_str == "Tuesday") {
-            weekday = Lesson::Tuesday;
-        } else if (weekday_str == "Wednesday") {
-            weekday = Lesson::Wednesday;
-        } else if (weekday_str == "Thursday") {
-            weekday = Lesson::Thursday;
-        } else if (weekday_str == "Friday") {
-            weekday = Lesson::Friday;
-        } else if (weekday_str == "Saturday") {
-            weekday = Lesson::Saturday;
-        }
-        Lesson newLesson(stod(start), stod(duration) + stod(start), lesson_type, weekday);
-        UcClass temporaryUcClass = findUcClass(uc_code, code_of_class);
-        temporaryUcClass.addLesson(newLesson);
+    while (getline(classes_file, class_code, ',')) {
+        getline(classes_file, uc_code, ',');
+        getline(classes_file, weekday_str, ',');
+        getline(classes_file, start, ',');
+        getline(classes_file, duration, ',');
+        getline(classes_file, type);
+
+
+        Lesson newLesson(
+            stod(start),
+            stod(duration) + stod(start),
+            STR_TO_TYPE.at(type),
+            STR_TO_WEEKDAY.at(weekday_str)
+        );
+        uc_classes_lessons.at(UcClass(uc_code, class_code)).push_back(newLesson);
     }
 }
 
-UcClass Dataset::findUcClass(const string& uc_code, const string& code_of_class) {
-    UcClass tempUcClass(uc_code, code_of_class, vector<Lesson>());
-    for (const UcClass& ucClass : uc_classes_) {
-        if (ucClass.getUcCode() == uc_code && ucClass.getClassCode() == code_of_class) {
-            return ucClass;
-        }
-    }
-
-    cout << "This UcClass could not be found." << endl;
-    return UcClass();
-}
+//UcClassRef Dataset::findUcClass(const string& uc_code, const string& code_of_class) {
+//    for (auto it = uc_classes_.begin(); it != uc_classes_.end(); it++) {
+//        if (it->getUcCode() == uc_code && it->getClassCode() == code_of_class) {
+//            return uc_class;
+//        }
+//    }
+//
+//    uc_classes_.end();
+//}
 
 vector<Student> Dataset::searchStudentsByAdmissionYear(int year) const {
     vector<Student> students_by_year;
@@ -158,7 +158,7 @@ vector<Student> Dataset::searchStudentsInAtLeastNUCs(int n) const {
 vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
     vector<Student> students_in_uc;
     for (const Student& student : students_) {
-        for (UcClass* ucClass : student.getUcClasses()) {
+        for (UcClassRef ucClass : student.getUcClasses()) {
             if (ucClass->getUcCode() == uc_code) {
                 students_in_uc.push_back(student);
                 break;
@@ -174,7 +174,7 @@ vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
 vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
     vector<Student> students_in_class;
     for (const Student &student: students_) {
-        for (const UcClass *ucClass: student.getUcClasses()) {
+        for (UcClassRef ucClass: student.getUcClasses()) {
             if (ucClass->getClassCode() == class_code) {
                 students_in_class.push_back(student);
                 break;
