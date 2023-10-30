@@ -14,6 +14,7 @@ private:
     int student_code_;
     std::string student_name_;
     std::list<UcClass*> uc_classes_;
+    int max_class_capacity_ = 0;
 public:
     /**
      * @brief Constructor of the class.
@@ -28,6 +29,7 @@ public:
     std::string getStudentName() const;
     std::list<UcClass*> &getUcClasses();
     const std::list<UcClass*> &getUcClasses() const;
+    bool hasClass(const UcClass& uc_class) const;
 };
 
 #endif //FEUP_AED1_STUDENT_H
