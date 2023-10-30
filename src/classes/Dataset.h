@@ -84,10 +84,9 @@ class Dataset {
     std::vector<Student> searchStudentsInClass(const std::string& class_code) const;
 
 private:
-    std::set<Student> students;
-    std::set<UcClass> ucClasses;
+    std::set<Student> students_;
+    std::set<UcClass> uc_classes_;
     std::vector<UcClass> all_classes;
 };
-
 
 #endif //FEUP_AED1_DATASET_H
