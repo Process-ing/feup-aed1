@@ -21,8 +21,8 @@ public:
      * Default constructor for UcClass
      * @author Diogo Vieira
      */
-
      UcClass();
+
     /**
      * Parameterized constructor for UcClass
      * @param ucCode
@@ -50,15 +50,24 @@ public:
     void addLesson(Lesson lesson);
     /**
     * @brief Less-than comparison operator for UcClass objects.
-    * This operator overloads the '<' operator to compare two UcClass objects based on their `uc_code_` member variable.
+    * This operator overloads the '<' operator to compare two UcClass objects based on their `uc_code` and `class_code`.
     * @param other The UcClass object to compare with.
     * @return True if this UcClass's `uc_code_` is less than the `uc_code_` of the other UcClass, false otherwise.
     * @author Diogo Vieira
     */
     bool operator<(const UcClass& other) const;
+    /**
+    * @brief Equality operator for UcClass objects.
+    * This operator overloads the '==' operator to compare two UcClass objects based on their `uc_code` and
+    * `class_code`.
+    * @param other The UcClass object to compare with.
+    * @return True if this UcClass's `uc_code_` is equal to the `uc_code_` of the other UcClass, false otherwise.
+    * @author Diogo Vieira
+    */
+    bool operator==(const UcClass& other) const;
 private:
     static string uc_code_;
-    static string code_of_class_;
+    static string class_code_;
     static vector<Lesson> lessons_;
     static int number_of_students_;
     static int max_capacity_;

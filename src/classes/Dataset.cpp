@@ -134,7 +134,7 @@ vector<Student> Dataset::searchStudentsByCode(int student_code) const {
 vector<Student> Dataset::searchStudentsByUcClass(UcClass& uc_class) const {
     vector<Student> students_in_class;
     for (const Student& student : students) {
-        if (student.studentClass(uc_class.getCodeOfClass())) {
+        if (student.hasClass(uc_class)) {
             students_in_class.push_back(student);
         }
     }
