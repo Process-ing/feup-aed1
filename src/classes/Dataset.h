@@ -1,3 +1,14 @@
+#ifndef FEUP_AED1_DATASET_H
+#define FEUP_AED1_DATASET_H
+
+#include <set>
+
+#include "Student.h"
+#include "UcClass.h"
+
+/**
+ * @brief Class that stores all dataset information and performs all actions on it.
+ */
 class Dataset {
       public:
         Dataset();

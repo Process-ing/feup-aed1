@@ -26,7 +26,7 @@ public:
     std::string getStudentName() const;
     std::list<UcClass*> &getUcClasses();
     const std::list<UcClass*> &getUcClasses() const;
-    bool studentClass(string code_of_class) const
+    bool studentClass(string code_of_class) const;
 };
 
 #endif //FEUP_AED1_STUDENT_H

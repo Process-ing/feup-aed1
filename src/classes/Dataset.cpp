@@ -1,3 +1,4 @@
+#include "Student.h"
 #include "UcClass.h"
 #include "Dataset.h"
 #include "Lesson.h"
@@ -25,7 +26,6 @@ const set<UcClass>& Dataset::getUcClasses() const {
 const vector<UcClass>& Dataset::getAllClasses() const {
     return all_classes;
 }
->>>>>>> Stashed changes
 void Dataset::UcReader() {
     vector<UcClass> ucClasses;
     set<UcClass> temporary;
