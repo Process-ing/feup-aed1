@@ -30,6 +30,7 @@ public:
     std::list<UcClass*> &getUcClasses();
     const std::list<UcClass*> &getUcClasses() const;
     bool hasClass(const UcClass& uc_class) const;
+    bool operator<(const Student &student) const;
 };
 
 #endif //FEUP_AED1_STUDENT_H

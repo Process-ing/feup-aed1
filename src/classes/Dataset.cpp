@@ -7,8 +7,10 @@
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <list>
 #include <map>
 #include <set>
+
 using namespace std;
 
 Dataset::Dataset() = default;
@@ -186,4 +188,30 @@ vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
         cout << "No students enrolled in class: " << class_code << endl;
     }
     return students_in_class;
+}
+
+void Dataset::readStudents() {
+    const static string STUDENT_CLASSES_PATH = "../files/students_classes.csv";
+    ifstream studentClassesFile(STUDENT_CLASSES_PATH);
+    if (!studentClassesFile.is_open()) {
+        cerr << "Error: Could not open the file" << endl;
+        return;
+    }
+    string sstudent_code, student_name, uc_code, class_code, line;
+    int student_code;
+    getline(studentClassesFile, line);
+    Student current_student(-1, "");
+    list<UcClass*> classes;
+    while (getline(studentClassesFile, sstudent_code, ',')) {
+        student_code = stoi(sstudent_code);
+        getline(studentClassesFile, student_name, ',');
+        getline(studentClassesFile, uc_code, ',');
+        getline(studentClassesFile, class_code);
+        if (current_student.getStudentCode() != student_code) {
+            students.insert(current_student);
+            current_student = Student(student_code, student_name);
+        }
+        // Criar operator< para UcClass e pair<string, string>
+        // current_student.getUcClasses().insert(&(*uc_classes_.find(pair(uc_code, class_code))))
+    }
 }

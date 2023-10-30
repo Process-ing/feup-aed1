@@ -2,7 +2,6 @@
 #define FEUP_AED1_DATASET_H
 
 #include <set>
-
 #include "Student.h"
 #include "UcClass.h"
 
@@ -87,6 +86,7 @@ private:
     std::set<Student> students;
     std::set<UcClass> ucClasses;
     std::vector<UcClass> all_classes;
+    void readStudents();
 };
 
 #endif //FEUP_AED1_DATASET_H
