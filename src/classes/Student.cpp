@@ -12,3 +12,11 @@ std::string Student::getStudentName() const { return student_name_; }
 std::list<UcClass*> &Student::getUcClasses() { return uc_classes_; }
 
 const std::list<UcClass*> &Student::getUcClasses() const { return uc_classes_; }
+
+bool Student::hasClass(const UcClass &uc_class) const {
+    for (UcClass *student_class: uc_classes_) {
+        if (*student_class == uc_class)
+            return true;
+    }
+    return false;
+}
