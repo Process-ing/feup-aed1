@@ -82,11 +82,12 @@ public:
      */
     std::vector<Student> searchStudentsInClass(const std::string& class_code) const;
 
+    void readStudents();
+
 private:
     std::set<Student> students;
     std::set<UcClass> ucClasses;
     std::vector<UcClass> all_classes;
-    void readStudents();
 };
 
 #endif //FEUP_AED1_DATASET_H
