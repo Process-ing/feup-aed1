@@ -9,7 +9,6 @@
 #include <fstream>
 #include <map>
 #include <set>
-#include <d2d1helper.h>
 
 using namespace std;
 
