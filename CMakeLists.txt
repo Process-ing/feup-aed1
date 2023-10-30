@@ -18,16 +18,3 @@ add_executable(feup-aed1
 )
 
 add_subdirectory(docs)
-
-# Doxygen build configuration (if needed)
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-        message("Doxygen build started")
-        add_custom_target(Doxygen ALL
-                COMMAND "${DOXYGEN_EXECUTABLE}" "${DOXYGEN_OUT}"
-                WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-                COMMENT "Generating API documentation with Doxygen"
-                VERBATIM)
-else(DOXYGEN_FOUND)
-        message("Doxygen needs to be installed to generate the documentation.")
-endif(DOXYGEN_FOUND)
