@@ -11,7 +11,7 @@
  * @brief Class that stores all dataset information and performs all actions on it.
  */
 class Dataset {
-public:
+  public:
     Dataset();
 
     const std::set<Student>& getStudents() const;
