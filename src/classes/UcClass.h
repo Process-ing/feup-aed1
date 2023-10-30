@@ -23,13 +23,18 @@ public:
      UcClass();
 
     /**
+    * Parameterized constructor for UcClass
+    * @param uc_code
+    * @param class_code
+    * @author Diogo Vieira
+    */
+    UcClass(const std::string& uc_code, const std::string& class_code);
+
+    /**
      * Parameterized constructor for UcClass
-     * @param ucCode
-     * @param codeOfClass
-     * @param dayOfTheWeek
-     * @param startTime
-     * @param classType
-     * @param classDuration
+     * @param uc_code
+     * @param class_codecodeOfClass
+     * @param lessons
      * @author Diogo Vieira
      */
     UcClass(const std::string& uc_code, const std::string& class_code, const std::vector<Lesson>& lessons);
