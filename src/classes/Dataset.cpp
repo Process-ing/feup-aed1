@@ -14,11 +14,11 @@ using namespace std;
 Dataset::Dataset() = default;
 
 const set<Student>& Dataset::getStudents() const {
-    return students;
+    return students_;
 }
 
 const set<UcClass>& Dataset::getUcClasses() const {
-    return ucClasses;
+    return uc_classes_;
 }
 
 void Dataset::UcReader() {
@@ -103,7 +103,7 @@ UcClass Dataset::findUcClass(const string& uc_code, const string& code_of_class)
 
 vector<Student> Dataset::searchStudentsByAdmissionYear(int year) const {
     vector<Student> students_by_year;
-    for (const Student& student : students) {
+    for (const Student& student : students_) {
         int student_code = student.getStudentCode();
         int student_year = student_code / 10000;
 
@@ -119,7 +119,7 @@ vector<Student> Dataset::searchStudentsByAdmissionYear(int year) const {
 
 vector<Student> Dataset::searchStudentsByCode(int student_code) const {
     vector<Student> the_student;
-    for (const Student& student : students) {
+    for (const Student& student : students_) {
         if (student.getStudentCode() == student_code) {
             the_student.push_back(student);
         }
@@ -132,7 +132,7 @@ vector<Student> Dataset::searchStudentsByCode(int student_code) const {
 
 vector<Student> Dataset::searchStudentsByUcClass(const UcClass& uc_class) const {
     vector<Student> students_in_class;
-    for (const Student& student : students) {
+    for (const Student& student : students_) {
         if (student.hasClass(uc_class)) {
             students_in_class.push_back(student);
         }
@@ -145,7 +145,7 @@ vector<Student> Dataset::searchStudentsByUcClass(const UcClass& uc_class) const 
 
 vector<Student> Dataset::searchStudentsInAtLeastNUCs(int n) const {
     vector<Student> students_in_at_least_n_ucs;
-    for (const Student& student : students) {
+    for (const Student& student : students_) {
         if (student.getUcClasses().size() >= n) {
             students_in_at_least_n_ucs.push_back(student);
         }
@@ -158,7 +158,7 @@ vector<Student> Dataset::searchStudentsInAtLeastNUCs(int n) const {
 
 vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
     vector<Student> students_in_uc;
-    for (const Student& student : students) {
+    for (const Student& student : students_) {
         for (UcClass* ucClass : student.getUcClasses()) {
             if (ucClass->getUcCode() == uc_code) {
                 students_in_uc.push_back(student);
@@ -174,7 +174,7 @@ vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
 
 vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
     vector<Student> students_in_class;
-    for (const Student &student: students) {
+    for (const Student &student: students_) {
         for (const UcClass *ucClass: student.getUcClasses()) {
             if (ucClass->getClassCode() == class_code) {
                 students_in_class.push_back(student);

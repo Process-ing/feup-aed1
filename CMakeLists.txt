@@ -4,6 +4,9 @@ project(feup-aed1)
 set(CMAKE_CXX_STANDARD 11)
 
 include_directories(${PROJECT_SOURCE_DIR}/src/classes)
+include_directories(${PROJECT_SOURCE_DIR}/src)
+
+file(COPY src/menus/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/menus)
 
 add_executable(feup-aed1 main.cpp
         src/classes/Request.cpp
@@ -16,6 +19,10 @@ add_executable(feup-aed1 main.cpp
         src/classes/Student.cpp
         src/classes/Lesson.h
         src/classes/Lesson.cpp
+        src/classes/Menu.cpp
+        src/classes/Menu.h
+        src/utils.cpp
+        src/utils.h
 )
 
 add_subdirectory(docs)

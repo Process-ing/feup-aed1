@@ -10,7 +10,7 @@
  * @brief Class that stores all dataset information and performs all actions on it.
  */
 class Dataset {
-public:
+  public:
     Dataset();
 
     const std::set<Student>& getStudents() const;
@@ -84,8 +84,8 @@ public:
     std::vector<Student> searchStudentsInClass(const std::string& class_code) const;
 
 private:
-    std::set<Student> students;
-    std::set<UcClass> ucClasses;
+    std::set<Student> students_;
+    std::set<UcClass> uc_classes_;
     std::vector<UcClass> all_classes;
 };
 
