@@ -161,7 +161,7 @@ vector<Student> Dataset::searchStudentsInAtLeastNUCs(int n) const {
 vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
     vector<Student> students_in_uc;
     for (const Student& student : students) {
-        for (UcClass* ucClass : student.getUcClasses()) {
+        for (UcClassRef ucClass : student.getUcClasses()) {
             if (ucClass->getUcCode() == uc_code) {
                 students_in_uc.push_back(student);
                 break;
@@ -177,7 +177,7 @@ vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
 vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
     vector<Student> students_in_class;
     for (const Student &student: students) {
-        for (const UcClass *ucClass: student.getUcClasses()) {
+        for (UcClassRef ucClass: student.getUcClasses()) {
             if (ucClass->getClassCode() == class_code) {
                 students_in_class.push_back(student);
                 break;
@@ -211,7 +211,6 @@ void Dataset::readStudents() {
             students.insert(current_student);
             current_student = Student(student_code, student_name);
         }
-        // Criar operator< para UcClass e pair<string, string>
-        // current_student.getUcClasses().insert(&(*uc_classes_.find(pair(uc_code, class_code))))
+        current_student.getUcClasses().insert(current_student.getUcClasses().end(), ucClasses.find(UcClass(uc_code,class_code)));
     }
 }

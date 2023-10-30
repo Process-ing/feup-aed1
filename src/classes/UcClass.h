@@ -33,6 +33,7 @@ public:
      * @author Diogo Vieira
      */
     UcClass(const std::string& uc_code, const std::string& class_code, const std::vector<Lesson>& lessons);
+    UcClass(const std::string& uc_code, const std::string& class_code);
     std::string getUcCode() const;
     std::string getClassCode() const;
     std::vector<Lesson>& getLessons();
