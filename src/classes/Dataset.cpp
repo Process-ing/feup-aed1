@@ -105,7 +105,7 @@ UcClass Dataset::findUcClass(string uc_code, string code_of_class) {
     return UcClass();
 }
 
-vector<Student> Dataset::searchStudentsByYear(int year) const {
+vector<Student> Dataset::searchStudentsByAdmissionYear(int year) const {
     vector<Student> students_by_year;
     for (const Student &student: students) {
         int student_code = student.getStudentCode();
@@ -115,15 +115,79 @@ vector<Student> Dataset::searchStudentsByYear(int year) const {
             students_by_year.push_back(student);
         }
     }
+    if (students_by_year.empty()) {
+        cout << "No students admitted in the year " << year << endl;
+    }
     return students_by_year;
 }
 
-vector<Student> Dataset::searchStudentsByClass(string ucclass_code) const {
+vector<Student> Dataset::searchStudentsByCode(int student_code) const {
+    vector<Student> the_student;
+    for (Student student : students) {
+        if (student.getStudentCode() == student_code) {
+            the_student.push_back(student);
+        }
+    }
+    if(the_student.empty()){
+        cout << "No student with code " << student_code << " was found." << endl;
+    }
+    return the_student;
+}
+
+vector<Student> Dataset::searchStudentsByUcClass(UcClass& uc_class) const {
     vector<Student> students_in_class;
-    for (const Student& student : students) {
-        if (student.studentClass(ucclass_code)) {
+    for (Student student : students) {
+        if (student.studentClass(uc_class.getCodeOfClass())) {
             students_in_class.push_back(student);
         }
+    }
+    if (students_in_class.empty()) {
+        cout << "No students enrolled in the UC class: " << uc_class.getCodeOfClass() << endl;
+    }
+    return students_in_class;
+}
+
+vector<Student> Dataset::searchStudentsInAtLeastNUCs(int n) const {
+    vector<Student> students_in_at_least_n_ucs;
+    for (const Student student : students) {
+        if (student.getUcClasses().size() >= n) {
+            students_in_at_least_n_ucs.push_back(student);
+        }
+    }
+    if (students_in_at_least_n_ucs.empty()) {
+        cout << "No students enrolled in at least " << n << " UCs." << endl;
+    }
+    return students_in_at_least_n_ucs;
+}
+
+vector<Student> Dataset::searchStudentsInUC(string uc_code) const {
+    vector<Student> students_in_uc;
+    for (Student student : students) {
+        for (UcClass* ucClass : student.getUcClasses()) {
+            if (ucClass->getUcCode() == uc_code) {
+                students_in_uc.push_back(student);
+                break;
+            }
+        }
+    }
+    if(students_in_uc.empty()){
+        cout << "No students enrolled in the UC: " << uc_code << endl;
+    }
+    return students_in_uc;
+}
+
+vector<Student> Dataset::searchStudentsInClass(string code_of_class) const {
+    vector<Student> students_in_class;
+    for (const Student &student : students) {
+        for (const UcClass *ucClass : student.getUcClasses()) {
+            if (ucClass->getCodeOfClass() == code_of_class) {
+                students_in_class.push_back(student);
+                break;
+            }
+        }
+    }
+    if(students_in_class.empty()){
+        cout << "No students enrolled in Class: " << code_of_class << endl;
     }
     return students_in_class;
 }
