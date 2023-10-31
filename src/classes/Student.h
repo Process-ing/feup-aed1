@@ -13,12 +13,12 @@
 typedef std::vector<UcClass>::const_iterator UcClassRef;
 
 class Student {
-private:
+  private:
     int student_code_;
     std::string student_name_;
     std::list<UcClassRef> uc_classes_;
     int max_class_capacity_ = 0;
-public:
+  public:
     /**
      * @brief Constructor of the class.
      * @author João Mendes

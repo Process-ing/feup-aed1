@@ -33,9 +33,13 @@ class Menu {
 
     void searchMenu() const;
     static SortOption sortMenu();
+    void chooseScheduleMenu() const;
+    void displayDiagramSchedule(const std::string& class_code) const;
+    void displayDiagramSchedule(const Student& student) const;
 
     static int receiveOption(int max);
     static void waitForEnter();
+    static void clearScreen();
 };
 
 

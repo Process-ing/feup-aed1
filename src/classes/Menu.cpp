@@ -1,7 +1,9 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <limits>
+#include <unordered_map>
 
 #include "Menu.h"
 
@@ -28,11 +30,15 @@ void Menu::launch() const {
     }
 
     while (true) {
+        clearScreen();
         cout << welcome_screen_file.rdbuf();
 
         switch (receiveOption(NUM_OPTIONS)) {
             case Option::SEARCH:
                 searchMenu();
+                break;
+            case Option::SCHEDULE:
+                chooseScheduleMenu();
                 break;
             case Option::EXIT:
                 cout << "Exiting the app. ";
@@ -61,6 +67,7 @@ void Menu::searchMenu() const {
         GO_BACK = 11,
     };
 
+    clearScreen();
     ifstream search_menu_file(SEARCH_MENU_FILEPATH);
     if (search_menu_file.fail()) {
         ostringstream error_msg;
@@ -82,6 +89,7 @@ Menu::SortOption Menu::sortMenu() {
     const static string SORT_MENU_FILEPATH = "src/menus/sort_menu.txt";
     const static int NUM_OPTIONS = 4;
 
+    clearScreen();
     ifstream sort_menu_file(SORT_MENU_FILEPATH);
     if (sort_menu_file.fail()) {
         ostringstream error_msg;
@@ -91,6 +99,100 @@ Menu::SortOption Menu::sortMenu() {
 
     cout << sort_menu_file.rdbuf();
     return (SortOption) receiveOption(NUM_OPTIONS);
+}
+
+void Menu::chooseScheduleMenu() const {
+    const static string CHOOSE_SCHEDULE_FILEPATH = "src/menus/choose_schedule_menu.txt";
+    const static int NUM_OPTIONS = 2;
+    enum Option {
+        STUDENT = 1,
+        CLASS = 2,
+    };
+
+    clearScreen();
+    ifstream chooseScheduleFile(CHOOSE_SCHEDULE_FILEPATH);
+    if (chooseScheduleFile.fail()) {
+        ostringstream error_msg;
+        error_msg << "cannot read menu file \"" << CHOOSE_SCHEDULE_FILEPATH << "\".";
+        throw ios_base::failure(error_msg.str());
+    }
+
+    cout << chooseScheduleFile.rdbuf();
+
+    switch (receiveOption(NUM_OPTIONS)) {
+        case Option::STUDENT:
+            displayDiagramSchedule(*dataset_.getStudents().begin());
+            break;
+        case Option::CLASS:
+            displayDiagramSchedule("1LEIC01");
+    }
+}
+
+void Menu::displayDiagramSchedule(const string& class_code) const {
+    static const unordered_map<Lesson::Weekday, string> WEEKDAY_TO_STR = {
+            {Lesson::MONDAY, "Monday"}, {Lesson::TUESDAY, "Tuesday"}, {Lesson::WEDNESDAY, "Wednesday"},
+            {Lesson::THURSDAY, "Thursday"}, {Lesson::FRIDAY, "Friday"}, {Lesson::SATURDAY, "Saturday"}
+    };
+    static const unordered_map<Lesson::Type, string> TYPE_TO_STR = {
+            {Lesson::T, "T"}, {Lesson::TP, "TP"}, {Lesson::PL, "PL"}
+    };
+
+    clearScreen();
+    cout << '\n'
+         << " ┌─ Class diagram schedule ──────────────────────────────────────────────────────────────┐\n"
+         << " │                                                                                       │\n"
+         << " |  " << left << setw(85) << "Class: " + class_code << "|\n"
+         << " │                                                                                       │\n";
+    for (const UcClass& uc_class: dataset_.getUcClassesByClassCode(class_code)) {
+        cout << " │  " << left << setw(85) << uc_class.getUcCode() + ":" << "│\n";
+        for (const Lesson& lesson: uc_class.getLessons()) {
+            ostringstream lesson_str;
+            lesson_str << "Weekday: " << WEEKDAY_TO_STR.at(lesson.getWeekday())
+                << "; Start: " << lesson.getFormattedStart()
+                << "; End: " << lesson.getFormattedEnd()
+                << "; Type: " << TYPE_TO_STR.at(lesson.getType());
+            cout << " |    - " << left << setw(81) << lesson_str.str() << "│\n";
+        }
+    }
+
+    cout << " │                                                                                       │\n"
+         << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    waitForEnter();
+}
+
+void Menu::displayDiagramSchedule(const Student &student) const {
+    static const unordered_map<Lesson::Weekday, string> WEEKDAY_TO_STR = {
+            {Lesson::MONDAY, "Monday"}, {Lesson::TUESDAY, "Tuesday"}, {Lesson::WEDNESDAY, "Wednesday"},
+            {Lesson::THURSDAY, "Thursday"}, {Lesson::FRIDAY, "Friday"}, {Lesson::SATURDAY, "Saturday"}
+    };
+    static const unordered_map<Lesson::Type, string> TYPE_TO_STR = {
+            {Lesson::T, "T"}, {Lesson::TP, "TP"}, {Lesson::PL, "PL"}
+    };
+
+    clearScreen();
+    cout << '\n'
+         << " ┌─ Student diagram schedule ────────────────────────────────────────────────────────────┐\n"
+         << " │                                                                                       │\n"
+         << " │  " << left << setw(85) << "Student code: " + to_string(student.getStudentCode()) << "│\n"
+         << " │  " << setw(85) << "Student name: " + student.getStudentName() << "│\n"
+         << " │                                                                                       │\n";
+
+
+    for (UcClassRef uc_class: student.getUcClasses()) {
+        cout << " │  " << left << setw(85) << uc_class->getUcCode() + " - " + uc_class->getClassCode() + ":" << "│\n";
+        for (const Lesson& lesson: uc_class->getLessons()) {
+            ostringstream lesson_str;
+            lesson_str << "Weekday: " << WEEKDAY_TO_STR.at(lesson.getWeekday())
+                       << "; Start: " << lesson.getFormattedStart()
+                       << "; End: " << lesson.getFormattedEnd()
+                       << "; Type: " << TYPE_TO_STR.at(lesson.getType());
+            cout << " |    - " << left << setw(81) << lesson_str.str() << "│\n";
+        }
+    }
+
+    cout << " │                                                                                       │\n"
+         << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    waitForEnter();
 }
 
 int Menu::receiveOption(int max) {
@@ -108,4 +210,8 @@ void Menu::waitForEnter() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "Press ENTER to continue...";
     getchar();
+}
+
+void Menu::clearScreen() {
+    system("clear || cls");
 }

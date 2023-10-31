@@ -1,11 +1,11 @@
 
-┌─ Sort results by ─────────────────────────────────────────────────────────────────────┐
-│                                                                                       │
-│  Options:                                                                             │
-│    [1] Alphabetical order                                                             │
-│    [2] Reverse alphabetical order                                                     │
-│    [3] Ascending code                                                                 │
-│    [4] Descending code                                                                │
-│                                                                                       │
-└───────────────────────────────────────────────────────────────────────────────────────┘
+ ┌─ Sort results by ─────────────────────────────────────────────────────────────────────┐
+ │                                                                                       │
+ │  Options:                                                                             │
+ │    [1] Alphabetical order                                                             │
+ │    [2] Reverse alphabetical order                                                     │
+ │    [3] Ascending code                                                                 │
+ │    [4] Descending code                                                                │
+ │                                                                                       │
+ └───────────────────────────────────────────────────────────────────────────────────────┘
 

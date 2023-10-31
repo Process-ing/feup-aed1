@@ -6,6 +6,8 @@
 #define FEUP_AED1_LESSON_H
 
 
+#include <string>
+
 class Lesson {
 public:
     /**
@@ -30,6 +32,8 @@ public:
 
     double getStart() const;
     double getEnd() const;
+    std::string getFormattedStart() const;
+    std::string getFormattedEnd() const;
     Type getType() const;
     Weekday getWeekday() const;
     /**

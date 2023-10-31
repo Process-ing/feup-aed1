@@ -67,7 +67,7 @@ class Dataset {
      * @param student_code The student code to search for.
      * @return A vector containing the found student(s) with the given code, which may be empty if no student matches the code.
      */
-    std::vector<Student> searchStudentsByCode(int student_code) const;
+    std::set<Student>::iterator searchStudentByCode(int student_code) const;
 
     /**
      * Searches for students enrolled in a specific UC by its unique code.
@@ -86,6 +86,17 @@ class Dataset {
     std::vector<Student> searchStudentsInClass(const std::string& class_code) const;
 
     void readStudents();
+
+    /**
+     * @brief Returns the lessons of the student, based on its classes and sorted by start time.
+     * Complexity: O(m*n), where m is the number of classes of the student and n is the max number of lessons
+     * in each class
+     * @param student
+     * @return Student's lessons
+     */
+    std::vector<Lesson> getStudentLessons(const Student& student) const;
+
+    std::vector<UcClass> getUcClassesByClassCode(const std::string& class_code) const;
 
 private:
     std::vector<UcClass> uc_classes_;

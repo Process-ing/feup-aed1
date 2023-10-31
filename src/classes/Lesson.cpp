@@ -1,4 +1,8 @@
+#include <sstream>
+#include <iomanip>
 #include "Lesson.h"
+
+using namespace std;
 
 Lesson::Lesson(double start, double end, Type type, Weekday weekday) {
     start_ = start;
@@ -10,6 +14,18 @@ Lesson::Lesson(double start, double end, Type type, Weekday weekday) {
 double Lesson::getStart() const { return start_; }
 
 double Lesson::getEnd() const { return end_; }
+
+string Lesson::getFormattedStart() const {
+    ostringstream res;
+    res << setfill('0') << setw(2) << (int)start_ << ':' << setw(2) << (int)((start_ - (int)start_) * 60);
+    return res.str();
+}
+
+string Lesson::getFormattedEnd() const {
+    ostringstream res;
+    res << setfill('0') << setw(2) << (int)end_ << ':' << setw(2) << (int)((end_ - (int)end_) * 60);
+    return res.str();
+}
 
 Lesson::Type Lesson::getType() const { return type_; }
 
