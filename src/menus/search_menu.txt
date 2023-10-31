@@ -1,0 +1,18 @@
+
+┌─ Search ──────────────────────────────────────────────────────────────────────────────┐
+│                                                                                       │
+│  Options:                                                                             │
+│    [1] List all students                                                              │
+│    [2] List all UCs                                                                   │
+│    [3] List all classes                                                               │
+│    [4] Search student with code                                                       │
+│    [5] Search students in UC                                                          │
+│    [6] Search students in class                                                       │
+│    [7] Search students in a UC's class                                                │
+│    [8] Search students in academic year                                               │
+│    [9] Search students with admission year                                            │
+│    [10] Search students in at least n UCs                                             │
+│    [11] Go back                                                                       │
+│                                                                                       │
+└───────────────────────────────────────────────────────────────────────────────────────┘
+

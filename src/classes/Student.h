@@ -8,6 +8,7 @@
 #include <list>
 #include <set>
 #include <string>
+#include <set>
 
 typedef std::set<UcClass>::const_iterator UcClassRef;
 

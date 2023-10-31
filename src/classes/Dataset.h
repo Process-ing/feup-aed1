@@ -2,6 +2,7 @@
 #define FEUP_AED1_DATASET_H
 
 #include <set>
+#include <map>
 #include "Student.h"
 #include "UcClass.h"
 
@@ -9,21 +10,23 @@
  * @brief Class that stores all dataset information and performs all actions on it.
  */
 class Dataset {
-public:
+  public:
     Dataset();
 
     const std::set<Student>& getStudents() const;
     const std::set<UcClass>& getUcClasses() const;
 
+    void readFiles();
+
     /**
      * Reads Uc data from a file and populates the dataset.
      */
-    void UcReader();
+    void readUcs(std::map<UcClass, std::vector<Lesson>>& uc_classes_lessons);
 
     /**
      * Reads UcClasses data from a file and populates the dataset.
      */
-    void UcClassReader();
+    void readClasses(std::map<UcClass, std::vector<Lesson>>& uc_classes_lessons);
 
     /**
      * Find a specific UcClass based on its unique code and class code.
@@ -32,7 +35,7 @@ public:
      * @param code_of_class The class code of the UcClass to find.
      * @return The found UcClass, or an empty one if not found.
      */
-    UcClass findUcClass(const std::string& uc_code, const std::string& code_of_class);
+    // UcClassRef findUcClass(const std::string& uc_code, const std::string& code_of_class);
 
     /**
      * Searches for students in the dataset based on their admission year.
@@ -85,9 +88,8 @@ public:
     void readStudents();
 
 private:
-    std::set<Student> students;
-    std::set<UcClass> ucClasses;
-    std::vector<UcClass> all_classes;
+    std::set<Student> students_;
+    std::set<UcClass> uc_classes_;
 };
 
 #endif //FEUP_AED1_DATASET_H
