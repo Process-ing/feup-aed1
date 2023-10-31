@@ -16,6 +16,7 @@ using namespace std;
 
 Dataset::Dataset(){
     readFiles();
+    readStudents();
 }
 
 const set<Student>& Dataset::getStudents() const {
@@ -189,7 +190,7 @@ vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
 }
 
 void Dataset::readStudents() {
-    const static string STUDENT_CLASSES_PATH = "../files/students_classes.csv";
+    const static string STUDENT_CLASSES_PATH = "../dataset/students_classes.csv";
     ifstream studentClassesFile(STUDENT_CLASSES_PATH);
     if (!studentClassesFile.is_open()) {
         cerr << "Error: Could not open the file" << endl;
