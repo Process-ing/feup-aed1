@@ -10,7 +10,7 @@
 #include <string>
 #include <set>
 
-typedef std::set<UcClass>::const_iterator UcClassRef;
+typedef std::vector<UcClass>::const_iterator UcClassRef;
 
 class Student {
 private:

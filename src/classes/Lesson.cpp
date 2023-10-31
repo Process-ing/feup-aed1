@@ -16,9 +16,9 @@ Lesson::Type Lesson::getType() const { return type_; }
 Lesson::Weekday Lesson::getWeekday() const { return weekday_; }
 
 bool Lesson::operator<(const Lesson &lesson) const {
-    return this->start_ < lesson.start_;
+    return weekday_ < lesson.weekday_ || (weekday_ == lesson.weekday_ && start_ < lesson.start_);
 }
 
 bool Lesson::overlaps(const Lesson &lesson) const {
-    return this->start_ < lesson.end_ && lesson.start_ < this->end_;
+    return weekday_ == lesson.weekday_ && start_ < lesson.end_ && lesson.start_ < this->end_;
 }
