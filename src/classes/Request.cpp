@@ -12,17 +12,19 @@ void Request::perform(Dataset &dataset) {
     switch (type_) {
         case ADD:
             if (!(alreadyInUc(target_class_) || addBalanceDisturbance(dataset) || overlaping()))
-                student_->getUcClasses().insert(student_->getUcClasses().end(), dataset.getUcClasses().find(*target_class_));
+                student_->getUcClasses().insert(student_->getUcClasses().end(), dataset.findUcClass(
+                        target_class_->getUcCode(), target_class_->getClassCode()));
             break;
         case REMOVE:
             if (alreadyInUc(current_class_) && !removeBalanceDisturbance(dataset))
-                student_->getUcClasses().remove(dataset.getUcClasses().find(*current_class_));
+                student_->getUcClasses().remove(dataset.findUcClass(current_class_->getUcCode(), current_class_->getClassCode()));
             break;
         case SWITCH:
             if (alreadyInUc(current_class_) && !removeBalanceDisturbance(dataset) &&
                 !(alreadyInUc(target_class_) || addBalanceDisturbance(dataset) || overlaping())) {
-                student_->getUcClasses().remove(dataset.getUcClasses().find(*current_class_));
-                student_->getUcClasses().insert(student_->getUcClasses().end(), dataset.getUcClasses().find(*target_class_));
+                student_->getUcClasses().remove(dataset.findUcClass(current_class_->getUcCode(), current_class_->getClassCode()));
+                student_->getUcClasses().insert(student_->getUcClasses().end(), dataset.findUcClass(
+                        target_class_->getUcCode(), target_class_->getClassCode()));
             }
             break;
     }
