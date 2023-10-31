@@ -198,6 +198,6 @@ void Dataset::readStudents() {
             students_.insert(current_student);
             current_student = Student(student_code, student_name);
         }
-        current_student.getUcClasses().insert(current_student.getUcClasses().end(), uc_classes_.find(UcClass(uc_code,class_code)));
+        current_student.getUcClasses().emplace_back(findUcClass(uc_code,class_code));
     }
 }
