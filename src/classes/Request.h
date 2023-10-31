@@ -24,17 +24,23 @@ class Request {
         SWITCH
     };
 
-    Request(Type type, Student& student, UcClass& target_class);
+    Request(Type type, Student& student, UcClass& current_class, UcClass& target_class);
 
     void perform(Dataset& dataset);
 
     Type getType() const;
     const Student& getStudent() const;
     const UcClass& getTargetClass() const;
+    bool alreadyInUc(UcClass* what_class);
+    // bool classFull();
+    bool addBalanceDisturbance(Dataset &dataset);
+    bool removeBalanceDisturbance(Dataset &dataset);
+    bool overlaping();
 
   private:
     Type type_;
     Student* student_;
+    UcClass* current_class_;
     UcClass* target_class_;
 };
 
