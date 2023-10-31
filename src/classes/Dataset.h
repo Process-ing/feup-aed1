@@ -3,7 +3,6 @@
 
 #include <set>
 #include <map>
-
 #include "Student.h"
 #include "UcClass.h"
 
@@ -85,6 +84,8 @@ class Dataset {
      * @return A vector containing the students enrolled in the specified class, which may be empty if no students are found.
      */
     std::vector<Student> searchStudentsInClass(const std::string& class_code) const;
+
+    void readStudents();
 
 private:
     std::set<Student> students_;

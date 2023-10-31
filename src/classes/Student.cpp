@@ -20,3 +20,7 @@ bool Student::hasClass(const UcClass &uc_class) const {
     }
     return false;
 }
+
+bool Student::operator<(const Student &student) const{
+    return this->student_code_ < student.student_code_;
+}
