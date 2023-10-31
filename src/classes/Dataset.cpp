@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <list>
 #include <set>
 #include <unordered_map>
 #include <algorithm>
@@ -16,6 +17,7 @@ using namespace std;
 Dataset::Dataset(){
     readUcs();
     readClasses();
+    readStudents();
 }
 
 const set<Student>& Dataset::getStudents() const {
@@ -173,4 +175,29 @@ vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
         cout << "No students enrolled in class: " << class_code << endl;
     }
     return students_in_class;
+}
+
+void Dataset::readStudents() {
+    const static string STUDENT_CLASSES_PATH = "../dataset/students_classes.csv";
+    ifstream studentClassesFile(STUDENT_CLASSES_PATH);
+    if (!studentClassesFile.is_open()) {
+        cerr << "Error: Could not open the file" << endl;
+        return;
+    }
+    string sstudent_code, student_name, uc_code, class_code, line;
+    int student_code;
+    getline(studentClassesFile, line);
+    Student current_student(-1, "");
+    list<UcClass*> classes;
+    while (getline(studentClassesFile, sstudent_code, ',')) {
+        student_code = stoi(sstudent_code);
+        getline(studentClassesFile, student_name, ',');
+        getline(studentClassesFile, uc_code, ',');
+        getline(studentClassesFile, class_code);
+        if (current_student.getStudentCode() != student_code) {
+            students_.insert(current_student);
+            current_student = Student(student_code, student_name);
+        }
+        current_student.getUcClasses().insert(current_student.getUcClasses().end(), uc_classes_.find(UcClass(uc_code,class_code)));
+    }
 }

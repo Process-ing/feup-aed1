@@ -6,6 +6,7 @@
 #define FEUP_AED1_STUDENT_H
 #include "UcClass.h"
 #include <list>
+#include <set>
 #include <string>
 #include <set>
 
@@ -32,6 +33,7 @@ public:
     std::list<UcClassRef> &getUcClasses();
     const std::list<UcClassRef> &getUcClasses() const;
     bool hasClass(const UcClass& uc_class) const;
+    bool operator<(const Student &student) const;
 };
 
 #endif //FEUP_AED1_STUDENT_H
