@@ -3,10 +3,14 @@ project(feup-aed1)
 
 set(CMAKE_CXX_STANDARD 11)
 
+file(COPY dataset DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 include_directories(${PROJECT_SOURCE_DIR}/src/classes)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 file(COPY src/menus/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/menus)
+
+file(COPY dataset/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/menus)
 
 add_executable(feup-aed1 main.cpp
         src/classes/Request.cpp

@@ -8,6 +8,12 @@ UcClass::UcClass() {
     this->number_of_students_ = 0;
 }
 
+UcClass::UcClass(const string& uc_code, const string& class_code) {
+    this->uc_code_ = uc_code;
+    this->class_code_ = class_code;
+    this->number_of_students_ = 0;
+}
+
 UcClass::UcClass(const string& uc_code, const string& class_code, const vector<Lesson>& lessons) {
     this->uc_code_ = uc_code;
     this->class_code_ = class_code;
@@ -49,4 +55,8 @@ bool UcClass::operator<(const UcClass& other) const {
 
 bool UcClass::operator==(const UcClass &other) const {
     return uc_code_ == other.uc_code_ && class_code_ == other.class_code_;
+}
+
+int UcClass::getAcademicYear() const {
+    return class_code_[0] - '0';
 }

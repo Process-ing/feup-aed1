@@ -18,7 +18,7 @@ public:
      * @brief Represents what day of the week the lesson occurs in.
      * @author João Mendes
      */
-    enum Weekday {Monday, Tuesday, Wednesday, Thursday, Friday, Saturday};
+    enum Weekday {MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY};
     /**
      * @brief Constructor
      * @author João Mendes

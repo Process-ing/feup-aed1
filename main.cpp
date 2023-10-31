@@ -6,13 +6,11 @@
 #include <iostream>
 
 #include "Menu.h"
-
 using namespace std;
 
 int main() {
     Dataset dataset;
     Menu menu(dataset);
-
     try {
         menu.launch();
         return 0;
