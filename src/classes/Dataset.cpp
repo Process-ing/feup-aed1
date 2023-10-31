@@ -8,14 +8,15 @@
 #include <string>
 #include <fstream>
 #include <list>
-#include <map>
 #include <set>
 #include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 
 Dataset::Dataset(){
-    readFiles();
+    readUcs();
+    readClasses();
     readStudents();
 }
 
@@ -23,23 +24,11 @@ const set<Student>& Dataset::getStudents() const {
     return students_;
 }
 
-const set<UcClass>& Dataset::getUcClasses() const {
+const vector<UcClass>& Dataset::getUcClasses() const {
     return uc_classes_;
 }
 
-void Dataset::readFiles() {
-    map<UcClass, vector<Lesson>> uc_classes_lessons;
-    readUcs(uc_classes_lessons);
-    readClasses(uc_classes_lessons);
-    for (const auto& uc_class_lessons: uc_classes_lessons)
-        uc_classes_.insert(UcClass(
-            uc_class_lessons.first.getUcCode(),
-            uc_class_lessons.first.getClassCode(),
-            uc_class_lessons.second
-        ));
-}
-
-void Dataset::readUcs(map<UcClass, vector<Lesson>>& uc_classes_lessons) {
+void Dataset::readUcs() {
     static const string CLASSES_PER_UC_FILEPATH = "dataset/classes_per_uc.csv";
     ifstream classes_per_uc_file(CLASSES_PER_UC_FILEPATH);
     if (classes_per_uc_file.fail()) {
@@ -51,11 +40,12 @@ void Dataset::readUcs(map<UcClass, vector<Lesson>>& uc_classes_lessons) {
     getline(classes_per_uc_file, line);
     while (getline(classes_per_uc_file, uc_code, ',')) {
         getline(classes_per_uc_file, class_code);
-        uc_classes_lessons.emplace(UcClass(uc_code, class_code), vector<Lesson>());
+        uc_classes_.emplace_back(uc_code, class_code);
     }
+    sort(uc_classes_.begin(), uc_classes_.end());
 }
 
-void Dataset::readClasses(map<UcClass, vector<Lesson>>& uc_classes_lessons) {
+void Dataset::readClasses() {
     static const string CLASSES_FILEPATH = "dataset/classes.csv";
     static const unordered_map<string, Lesson::Type> STR_TO_TYPE = {
             { "T", Lesson::T }, { "TP", Lesson::TP }, { "PL", Lesson::PL },
@@ -71,7 +61,6 @@ void Dataset::readClasses(map<UcClass, vector<Lesson>>& uc_classes_lessons) {
         throw ios_base::failure(error_msg.str());
     }
     string line, class_code, uc_code, weekday_str, start, duration, type;
-    vector<Lesson> lessons;
 
     getline(classes_file, line);
     while (getline(classes_file, class_code, ',')) {
@@ -88,19 +77,18 @@ void Dataset::readClasses(map<UcClass, vector<Lesson>>& uc_classes_lessons) {
             STR_TO_TYPE.at(type),
             STR_TO_WEEKDAY.at(weekday_str)
         );
-        uc_classes_lessons.at(UcClass(uc_code, class_code)).push_back(newLesson);
+        findUcClass(uc_code, class_code)->getLessons().push_back(newLesson);
+    }
+
+    for (UcClass& uc_class: uc_classes_) {
+        vector<Lesson>& lessons = uc_class.getLessons();
+        sort(lessons.begin(), lessons.end());
     }
 }
 
-//UcClassRef Dataset::findUcClass(const string& uc_code, const string& code_of_class) {
-//    for (auto it = uc_classes_.begin(); it != uc_classes_.end(); it++) {
-//        if (it->getUcCode() == uc_code && it->getClassCode() == code_of_class) {
-//            return uc_class;
-//        }
-//    }
-//
-//    uc_classes_.end();
-//}
+vector<UcClass>::iterator Dataset::findUcClass(const string& uc_code, const string& class_code) {
+    return equal_range(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, class_code)).first;
+}
 
 vector<Student> Dataset::searchStudentsByAdmissionYear(int year) const {
     vector<Student> students_by_year;
@@ -210,6 +198,6 @@ void Dataset::readStudents() {
             students_.insert(current_student);
             current_student = Student(student_code, student_name);
         }
-        current_student.getUcClasses().insert(current_student.getUcClasses().end(), uc_classes_.find(UcClass(uc_code,class_code)));
+        current_student.getUcClasses().emplace_back(findUcClass(uc_code,class_code));
     }
 }

@@ -14,19 +14,19 @@ class Dataset {
     Dataset();
 
     const std::set<Student>& getStudents() const;
-    const std::set<UcClass>& getUcClasses() const;
+    const std::vector<UcClass>& getUcClasses() const;
 
     void readFiles();
 
     /**
      * Reads Uc data from a file and populates the dataset.
      */
-    void readUcs(std::map<UcClass, std::vector<Lesson>>& uc_classes_lessons);
+    void readUcs();
 
     /**
      * Reads UcClasses data from a file and populates the dataset.
      */
-    void readClasses(std::map<UcClass, std::vector<Lesson>>& uc_classes_lessons);
+    void readClasses();
 
     /**
      * Find a specific UcClass based on its unique code and class code.
@@ -35,7 +35,7 @@ class Dataset {
      * @param code_of_class The class code of the UcClass to find.
      * @return The found UcClass, or an empty one if not found.
      */
-    // UcClassRef findUcClass(const std::string& uc_code, const std::string& code_of_class);
+     std::vector<UcClass>::iterator findUcClass(const std::string& uc_code, const std::string& code_of_class);
 
     /**
      * Searches for students in the dataset based on their admission year.
@@ -88,8 +88,8 @@ class Dataset {
     void readStudents();
 
 private:
+    std::vector<UcClass> uc_classes_;
     std::set<Student> students_;
-    std::set<UcClass> uc_classes_;
 };
 
 #endif //FEUP_AED1_DATASET_H
