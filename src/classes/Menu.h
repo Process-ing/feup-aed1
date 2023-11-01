@@ -13,6 +13,7 @@ public:
     /**
      * @brief Constructs a Menu instance.
      * @param dataset The dataset used by the menu.
+     * @author Bruno Oliveira
      */
     explicit Menu(Dataset& dataset);
 
@@ -20,14 +21,15 @@ public:
      * @brief Enumerates sorting options for student lists.
      */
     enum SortOption {
-        ALPHABETICAL_ORDER = 1,
-        REVERSE_ALPHABETICAL_ORDER = 2,
-        ASCENDING_CODES = 3,
-        DESCENDING_CODES = 4,
+        ALPHABETICAL_ORDER = 1, ///< Sort students in alphabetical order by name.
+        REVERSE_ALPHABETICAL_ORDER = 2, ///< Sort students in reverse alphabetical order by name.
+        ASCENDING_CODES = 3, ///< Sort students by ascending student codes.
+        DESCENDING_CODES = 4, ///< Sort students by descending student codes.
     };
 
     /**
      * @brief Launches the menu, starting with the welcome screen.
+     * @author Bruno Oliviera
      */
     void launch() const;
 
@@ -39,7 +41,7 @@ public:
 
     /**
      * @brief Searches for students enrolled in a specific UC.
-     * @author Diogo Vieira
+     * @author Diogo Vieira and Bruno Oliveira
      */
     void searchStudentByUc() const;
 
@@ -69,13 +71,13 @@ public:
 
     /**
      * @brief Searches for students in a specific academic year.
-     * @author Diogo Vieira and Bruno Oliveira
+     * @author Bruno Oliveira
      */
     void searchStudentsByAcademicYear() const;
 
     /**
      * @brief Displays the list of UCs.
-     * @author Diogo Vieira
+     * @author Diogo Vieira and Bruno Oliveira
      */
     void displayUcs() const;
 
@@ -100,20 +102,30 @@ public:
      */
     void sortStudents(SortOption sortingOption, std::vector<Student> &students) const;
 
+    /**
+     * @brief Displays information about a single student.
+     * @param student The student to display.
+     * @author Diogo Vieira
+     */
+    void displayStudent(const Student student) const;
+
 private:
     /**
      * @brief Reference to the dataset used by the menu.
+     * @author Bruno Oliveira
      */
     Dataset &dataset_;
 
     /**
      * @brief Displays the main search menu.
+     * @author Bruno Oliveira
      */
     void searchMenu() const;
 
     /**
      * @brief Displays a menu for sorting options and returns the chosen option.
      * @return The selected sorting option.
+     * @author Diogo Vieira and Bruno Oliveira
      */
     static SortOption sortMenu();
 
@@ -121,11 +133,13 @@ private:
      * @brief Receives an option from the user, validating it against a maximum value.
      * @param max The maximum valid option.
      * @return The user's chosen option.
+     * @author Bruno Oliveira
      */
     static int receiveOption(int max);
 
     /**
      * @brief Waits for the user to press Enter before continuing.
+     * @author Bruno Oliveira
      */
     static void waitForEnter();
 };

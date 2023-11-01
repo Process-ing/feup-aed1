@@ -191,11 +191,9 @@ void Menu::searchStudentByCode() const {
     int student_code;
     cout << "Enter the student code: ";
     cin >> student_code;
-    vector<Student> students_by_code = dataset_.searchStudentsByCode(student_code);
-    if (!students_by_code.empty()) {
-        displayStudentsNameAndCode(students_by_code);
-    } else {
-        cout << "No student with code " << student_code << " was found." << endl;
+    auto student_by_code = dataset_.searchStudentByCode(student_code);
+    if(student_by_code != dataset_.students_.end()){
+        displayStudent(*student_by_code);
     }
 }
 
@@ -254,6 +252,13 @@ void Menu::searchStudentsInUcClass() const {
     vector<Student> students_in_ucclass = dataset_.searchStudentsByUcClass(uc_class);
     sortStudents(sortMenu(), students_in_ucclass);
     displayStudentsNameAndCode(students_in_ucclass);
+}
+
+void Menu::displayStudent(const Student student) const {
+    cout << "-----------------" << endl;
+    cout << "Student Name: " << student.getStudentName() << endl;
+    cout << "Student Code: " << student.getStudentCode() << endl;
+    cout << "-----------------" << endl;
 }
 
 void Menu::displayStudentsNameAndCode(const vector<Student>& students) const {
