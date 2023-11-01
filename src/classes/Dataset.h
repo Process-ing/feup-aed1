@@ -131,10 +131,10 @@ public:
      */
     std::vector<Student> searchStudentsByAcademicYear(int year) const;
 
-    const std::set<Student> students_;
 
 private:
     std::vector<UcClass> uc_classes_;
+    std::set<Student> students_;
 };
 
 #endif //FEUP_AED1_DATASET_H

@@ -191,8 +191,9 @@ void Menu::searchStudentByCode() const {
     int student_code;
     cout << "Enter the student code: ";
     cin >> student_code;
-    auto student_by_code = dataset_.searchStudentByCode(student_code);
-    if(student_by_code != dataset_.students_.end()){
+    const std::set<Student>& students = dataset_.getStudents();
+    auto student_by_code = students.find(Student(student_code, ""));
+    if (student_by_code != students.end()) {
         displayStudent(*student_by_code);
     }
 }
