@@ -97,6 +97,9 @@ class Dataset {
     std::vector<Lesson> getStudentLessons(const Student& student) const;
 
     std::vector<UcClass> getUcClassesByClassCode(const std::string& class_code) const;
+    std::vector<std::string> getUcCodes() const;
+    std::vector<UcClass> getClassesByUcCode(const std::string& uc_code) const;
+    std::vector<std::string> getClassCodesByYear(int year) const;
 
 private:
     std::vector<UcClass> uc_classes_;

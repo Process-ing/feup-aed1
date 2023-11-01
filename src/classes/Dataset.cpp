@@ -167,7 +167,6 @@ void Dataset::readStudents() {
         if (current_student.getStudentCode() != student_code) {
             if (current_student.getStudentCode() != -1)
                 students_.insert(current_student);
-            cout << current_student.getUcClasses().size();
             current_student = Student(student_code, student_name);
         }
         current_student.getUcClasses().emplace_back(findUcClass(uc_code,class_code));
@@ -193,4 +192,32 @@ vector<UcClass> Dataset::getUcClassesByClassCode(const string &class_code) const
             res.push_back(uc_class);
     }
     return res;
+}
+
+vector<string> Dataset::getUcCodes() const {
+    vector<string> res;
+    for (const UcClass& uc_class: uc_classes_) {
+        if (res.empty() || res.back() != uc_class.getUcCode())
+            res.push_back(uc_class.getUcCode());
+    }
+    return res;
+}
+
+vector<UcClass> Dataset::getClassesByUcCode(const string &uc_code) const {
+    vector<UcClass> res;
+    auto it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
+    while (it != uc_classes_.end() && it->getUcCode() == uc_code) {
+        res.push_back(*it);
+        it++;
+    }
+    return res;
+}
+
+vector<string> Dataset::getClassCodesByYear(int year) const {
+    set<string> res;
+    for (const UcClass& uc_class: uc_classes_) {
+        if (uc_class.getAcademicYear() == year)
+            res.insert(uc_class.getClassCode());
+    }
+    return { res.begin(), res.end() };
 }

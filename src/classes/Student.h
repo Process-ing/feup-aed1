@@ -10,7 +10,7 @@
 #include <string>
 #include <set>
 
-typedef std::vector<UcClass>::const_iterator UcClassRef;
+typedef std::vector<UcClass>::iterator UcClassRef;
 
 class Student {
   private:
@@ -35,5 +35,7 @@ class Student {
     bool hasClass(const UcClass& uc_class) const;
     bool operator<(const Student &student) const;
 };
+
+typedef std::set<Student>::iterator StudentRef;
 
 #endif //FEUP_AED1_STUDENT_H

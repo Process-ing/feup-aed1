@@ -36,8 +36,12 @@ class Menu {
     void chooseScheduleMenu() const;
     void displayDiagramSchedule(const std::string& class_code) const;
     void displayDiagramSchedule(const Student& student) const;
+    std::string chooseUcMenu() const;
+    UcClass chooseClassMenu(const std::string& uc_code) const;
+    std::string chooseClassWithYearMenu() const;
 
     static int receiveOption(int max);
+    int receiveStudentCode() const;
     static void waitForEnter();
     static void clearScreen();
 };
