@@ -21,8 +21,16 @@ Dataset::Dataset() {
     readStudents();
 }
 
+std::set<Student> &Dataset::getStudents() {
+    return students_;
+}
+
 const set<Student>& Dataset::getStudents() const {
     return students_;
+}
+
+std::vector<UcClass> &Dataset::getUcClasses() {
+    return uc_classes_;
 }
 
 const vector<UcClass>& Dataset::getUcClasses() const {
@@ -87,7 +95,11 @@ void Dataset::readClasses() {
     }
 }
 
-vector<UcClass>::iterator Dataset::findUcClass(const string& uc_code, const string& class_code) {
+UcClassRef Dataset::findUcClass(const string& uc_code, const string& class_code) {
+    return equal_range(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, class_code)).first;
+}
+
+UcClassConstRef Dataset::findUcClass(const string& uc_code, const string& class_code) const {
     return equal_range(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, class_code)).first;
 }
 
@@ -125,7 +137,7 @@ vector<Student> Dataset::searchStudentsInAtLeastNUCs(int n) const {
 vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
     vector<Student> students_in_uc;
     for (const Student& student : students_) {
-        for (UcClassRef ucClass : student.getUcClasses()) {
+        for (UcClassConstRef ucClass : student.getUcClasses()) {
             if (ucClass->getUcCode() == uc_code) {
                 students_in_uc.push_back(student);
                 break;
@@ -138,7 +150,7 @@ vector<Student> Dataset::searchStudentsInUC(const string& uc_code) const {
 vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
     vector<Student> students_in_class;
     for (const Student &student: students_) {
-        for (UcClassRef ucClass: student.getUcClasses()) {
+        for (UcClassConstRef ucClass: student.getUcClasses()) {
             if (ucClass->getClassCode() == class_code) {
                 students_in_class.push_back(student);
                 break;
@@ -151,9 +163,10 @@ vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
 void Dataset::readStudents() {
     const static string STUDENT_CLASSES_PATH = "dataset/students_classes.csv";
     ifstream studentClassesFile(STUDENT_CLASSES_PATH);
-    if (!studentClassesFile.is_open()) {
-        cerr << "Error: Could not open the file" << endl;
-        return;
+    if (studentClassesFile.fail()) {
+        ostringstream error_msg;
+        error_msg << "Could not open file \"" << STUDENT_CLASSES_PATH << '"';
+        throw ios_base::failure(error_msg.str());
     }
     string sstudent_code, student_name, uc_code, class_code, line;
     int student_code;
@@ -174,6 +187,9 @@ void Dataset::readStudents() {
         current_student.getUcClasses().emplace_back(uc_class);
         max_class_capacity_ = max(max_class_capacity_, uc_class->incrementNumberOfStudents());
     }
+
+    for (const Student& student: students_)
+        cout << student.getStudentName() << endl;
 }
 
 queue<Request>& Dataset::getPendentRequests() {
@@ -293,12 +309,9 @@ bool Dataset::canRemove(const Request& request, string& message) const {
         message = "Student must have at least one class";
         return false;
     }
-    if (!student.isInUc(request.getCurrentClass()->getUcCode())) {
-        message = "Student not in UC " + request.getCurrentClass()->getUcCode();
-        return false;
-    }
-    if (removeBalanceDisturbance(*request.getCurrentClass())) {
-        message = "Class balance of UC " + request.getCurrentClass()->getUcCode() + " would be broken";
+    if (!student.isInClass(*request.getCurrentClass())) {
+        message = "Student does not belong to class " + request.getCurrentClass()->getUcCode()
+                + '-' + request.getCurrentClass()->getClassCode();
         return false;
     }
     return true;
@@ -324,12 +337,8 @@ bool Dataset::canSwitch(const Request& request, string& message) const {
         return false;
     }
     if (isClassFull(*request.getTargetClass())) {
-        message = "Class " + request.getTargetClass()->getClassCode() + " is full";
-        return false;
-    }
-    string problem_uc_code;
-    if (switchBalanceDisturbance(*request.getCurrentClass(), *request.getTargetClass(), problem_uc_code)) {
-        message = "Class balance of UC " + problem_uc_code + " would be broken";
+        message = "Class " + request.getTargetClass()->getUcCode()
+                + '-' + request.getTargetClass()->getClassCode() + " is full";
         return false;
     }
     return true;
@@ -337,27 +346,27 @@ bool Dataset::canSwitch(const Request& request, string& message) const {
 
 bool Dataset::addBalanceDisturbance(const UcClass& uc_class) const {
     int nmin = uc_class.getNumberOfStudents() + 1, nmax = uc_class.getNumberOfStudents() + 1;
-    for (const UcClass& other: getClassesInUc(uc_class.getUcCode())) {
-        nmin = min(nmin, other.getNumberOfStudents());
-        nmax = max(nmax, other.getNumberOfStudents());
+    for (auto other: getClassesInUc(uc_class.getUcCode())) {
+        nmin = min(nmin, other->getNumberOfStudents());
+        nmax = max(nmax, other->getNumberOfStudents());
     }
     return nmax - nmin > 4;
 }
 
 bool Dataset::removeBalanceDisturbance(const UcClass& uc_class) const {
     int nmin = uc_class.getNumberOfStudents() - 1, nmax = uc_class.getNumberOfStudents() - 1;
-    for (const UcClass& other: getClassesInUc(uc_class.getUcCode())) {
-        nmin = min(nmin, other.getNumberOfStudents());
-        nmax = max(nmax, other.getNumberOfStudents());
+    for (auto other: getClassesInUc(uc_class.getUcCode())) {
+        nmin = min(nmin, other->getNumberOfStudents());
+        nmax = max(nmax, other->getNumberOfStudents());
     }
     return nmax - nmin > 4;
 }
 
 bool Dataset::switchBalanceDisturbance(const UcClass& from, const UcClass& dest, string& problem_uc_code) const {
     int nmin = dest.getNumberOfStudents() + 1, nmax = dest.getNumberOfStudents() + 1;
-    for (const UcClass& other: getClassesInUc(dest.getUcCode())) {
-        nmin = min(nmin, other == from ? other.getNumberOfStudents() - 1 : other.getNumberOfStudents());
-        nmax = max(nmax, other == from ? other.getNumberOfStudents() - 1 : other.getNumberOfStudents());
+    for (auto other: getClassesInUc(dest.getUcCode())) {
+        nmin = min(nmin, *other == from ? other->getNumberOfStudents() - 1 : other->getNumberOfStudents());
+        nmax = max(nmax, *other == from ? other->getNumberOfStudents() - 1 : other->getNumberOfStudents());
     }
     if (nmax - nmin > 4) {
         problem_uc_code = dest.getUcCode();
@@ -365,9 +374,9 @@ bool Dataset::switchBalanceDisturbance(const UcClass& from, const UcClass& dest,
     }
 
     nmin = from.getNumberOfStudents() - 1, nmax = from.getNumberOfStudents() - 1;
-    for (const UcClass& other: getClassesInUc(from.getUcCode())) {
-        nmin = min(nmin, other == dest ? other.getNumberOfStudents() + 1 : other.getNumberOfStudents());
-        nmax = max(nmax, other == dest ? other.getNumberOfStudents() + 1 : other.getNumberOfStudents());
+    for (auto other: getClassesInUc(from.getUcCode())) {
+        nmin = min(nmin, *other == dest ? other->getNumberOfStudents() + 1 : other->getNumberOfStudents());
+        nmax = max(nmax, *other == dest ? other->getNumberOfStudents() + 1 : other->getNumberOfStudents());
     }
     if (nmax - nmin > 4) {
         problem_uc_code = from.getUcCode();
@@ -376,24 +385,31 @@ bool Dataset::switchBalanceDisturbance(const UcClass& from, const UcClass& dest,
     return false;
 }
 
+void Dataset::saveChangesToFile() const {
+    const static string STUDENT_CLASSES_PATH = "dataset/students_classes.csv";
+    ofstream studentClassesFile(STUDENT_CLASSES_PATH);
+    if (studentClassesFile.fail()) {
+        ostringstream error_msg;
+        error_msg << "Could not open file \"" << STUDENT_CLASSES_PATH << '"';
+        throw ios_base::failure(error_msg.str());
+    }
+
+    studentClassesFile << "StudentCode,StudentName,UcCode,ClassCode\n";
+    for (const Student& student: students_) {
+        for (UcClassConstRef uc_class: student.getUcClasses()) {
+            studentClassesFile << student.getStudentCode() << ',' << student.getStudentName() << ','
+                << uc_class->getUcCode() << ',' << uc_class->getClassCode() << '\n';
+        }
+    }
+}
+
 bool Dataset::isClassFull(const UcClass& uc_class) const {
     return uc_class.getNumberOfStudents() == max_class_capacity_;
 }
 
-
-void Dataset::saveChanges() {
-    if (pendent_requests_.empty())
-        cout << "\nNo requests were made\n" << endl;
-    while (!pendent_requests_.empty()) {
-        perform(pendent_requests_.front());
-        pendent_requests_.pop();
-    }
-}
-
-
 vector<Lesson> Dataset::getStudentLessons(const Student &student) const {
     vector<Lesson> res, temp;
-    for (UcClassRef uc_class: student.getUcClasses()) {
+    for (UcClassConstRef uc_class: student.getUcClasses()) {
         const vector<Lesson>& class_lessons = uc_class->getLessons();
         merge(res.begin(), res.end(), class_lessons.begin(), class_lessons.end(), temp.begin());
         res = temp;
@@ -402,11 +418,20 @@ vector<Lesson> Dataset::getStudentLessons(const Student &student) const {
     return res;
 }
 
-vector<UcClass> Dataset::getUcClassesByClassCode(const string &class_code) const {
-    vector<UcClass> res;
-    for (const UcClass& uc_class: uc_classes_) {
-        if (uc_class.getClassCode() == class_code)
-            res.push_back(uc_class);
+vector<UcClassConstRef> Dataset::getUcClassesByClassCode(const string &class_code) const {
+    vector<UcClassConstRef> res;
+    for (auto it = uc_classes_.begin(); it != uc_classes_.end(); it++) {
+        if (it->getClassCode() == class_code)
+            res.push_back(it);
+    }
+    return res;
+}
+
+vector<UcClassRef> Dataset::getUcClassesByClassCode(const string &class_code) {
+    vector<UcClassRef> res;
+    for (auto it = uc_classes_.begin(); it != uc_classes_.end(); it++) {
+        if (it->getClassCode() == class_code)
+            res.push_back(it);
     }
     return res;
 }
@@ -420,11 +445,31 @@ vector<string> Dataset::getUcCodes() const {
     return res;
 }
 
-vector<UcClass> Dataset::getClassesByUcCode(const string &uc_code) const {
-    vector<UcClass> res;
+vector<UcClassConstRef> Dataset::getClassesByUcCode(const string &uc_code) const {
+    vector<UcClassConstRef> res;
     auto it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
     while (it != uc_classes_.end() && it->getUcCode() == uc_code) {
-        res.push_back(*it);
+        res.push_back(it);
+        it++;
+    }
+    return res;
+}
+
+std::vector<UcClassRef> Dataset::getClassesByUcCode(const std::string &uc_code) {
+    vector<UcClassRef> res;
+    auto it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
+    while (it != uc_classes_.end() && it->getUcCode() == uc_code) {
+        res.push_back(it);
+        it++;
+    }
+    return res;
+}
+
+std::vector<UcClassRef> Dataset::getClassesInUc(const std::string &uc_code) {
+    vector<UcClassRef> res;
+    auto it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
+    while (it != uc_classes_.end() && it->getUcCode() == uc_code) {
+        res.push_back(it);
         it++;
     }
     return res;
@@ -438,11 +483,11 @@ vector<string> Dataset::getClassCodesByYear(int year) const {
     }
     return { res.begin(), res.end() };
 }
-vector<UcClass> Dataset::getClassesInUc(const std::string &uc_code) const {
-    vector<UcClass> res;
-    auto it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
+vector<UcClassConstRef> Dataset::getClassesInUc(const std::string &uc_code) const {
+    vector<UcClassConstRef> res;
+    UcClassConstRef it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
     while (it != uc_classes_.end() && it->getUcCode() == uc_code) {
-        res.push_back(*it);
+        res.push_back(it);
         it++;
     }
     return res;

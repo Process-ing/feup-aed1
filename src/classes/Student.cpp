@@ -12,12 +12,12 @@ int Student::getStudentCode() const { return student_code_; }
 
 std::string Student::getStudentName() const { return student_name_; }
 
-std::list<UcClassRef> &Student::getUcClasses() { return uc_classes_; }
+std::list<UcClassConstRef> &Student::getUcClasses() { return uc_classes_; }
 
-const std::list<UcClassRef> &Student::getUcClasses() const { return uc_classes_; }
+const std::list<UcClassConstRef> &Student::getUcClasses() const { return uc_classes_; }
 
 bool Student::isInClass(const UcClass &uc_class) const {
-    for (UcClassRef student_class: uc_classes_) {
+    for (UcClassConstRef student_class: uc_classes_) {
         if (*student_class == uc_class)
             return true;
     }
@@ -25,7 +25,7 @@ bool Student::isInClass(const UcClass &uc_class) const {
 }
 
 bool Student::isInUc(const std::string &uc_code) const {
-    for (UcClassRef student_class: uc_classes_) {
+    for (UcClassConstRef student_class: uc_classes_) {
         if (student_class->getUcCode() == uc_code)
             return true;
     }
@@ -34,7 +34,7 @@ bool Student::isInUc(const std::string &uc_code) const {
 
 std::vector<Lesson> Student::getLessons() const {
     vector<Lesson> res, temp;
-    for (UcClassRef uc_class: uc_classes_) {
+    for (UcClassConstRef uc_class: uc_classes_) {
         const vector<Lesson>& class_lessons = uc_class->getLessons();
         merge(res.begin(), res.end(), class_lessons.begin(), class_lessons.end(), back_inserter(temp));
         res = temp;
@@ -45,7 +45,7 @@ std::vector<Lesson> Student::getLessons() const {
 
 vector<Lesson> Student::getLessonsIgnoring(const UcClass &class_to_ignore) const {
     vector<Lesson> res, temp;
-    for (UcClassRef uc_class: uc_classes_) {
+    for (UcClassConstRef uc_class: uc_classes_) {
         if (*uc_class == class_to_ignore)
             continue;
         const vector<Lesson>& class_lessons = uc_class->getLessons();

@@ -15,8 +15,8 @@ class Student {
   private:
     int student_code_;
     std::string student_name_;
-    std::list<UcClassRef> uc_classes_;
-    int max_class_capacity_ = 0;
+    std::list<UcClassConstRef> uc_classes_;
+
   public:
     /**
      * @brief Constructor of the class.
@@ -29,8 +29,8 @@ class Student {
 
     int getStudentCode() const;
     std::string getStudentName() const;
-    std::list<UcClassRef> &getUcClasses();
-    const std::list<UcClassRef> &getUcClasses() const;
+    std::list<UcClassConstRef> &getUcClasses();
+    const std::list<UcClassConstRef> &getUcClasses() const;
     bool isInClass(const UcClass& uc_class) const;
     bool isInUc(const std::string& uc_code) const;
     std::vector<Lesson> getLessons() const;

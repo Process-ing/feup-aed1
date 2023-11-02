@@ -5,6 +5,7 @@
 #include <limits>
 #include <unordered_map>
 #include <cmath>
+#include <algorithm>
 
 #include "Menu.h"
 #include "Request.h"
@@ -14,7 +15,7 @@ using namespace std;
 
 Menu::Menu(Dataset& dataset) : dataset_(dataset) {}
 
-void Menu::launch() const {
+void Menu::launch() {
     const static string WELCOME_SCREEN_FILEPATH = "src/menus/welcome_screen.txt";
     const static int NUM_OPTIONS = 5;
     enum Option {
@@ -94,7 +95,7 @@ void Menu::searchMenu() const {
     }
 }
 
-void Menu::requestMenu() const {
+void Menu::requestMenu() {
     const static string REQUEST_MENU_FILEPATH = "src/menus/request_menu.txt";
     const static int NUM_OPTIONS = 5;
     enum Option {
@@ -114,54 +115,44 @@ void Menu::requestMenu() const {
 
     cout << request_menu_file.rdbuf();
 
-    string uc_code, class_code;
+    string uc_code;
+    StudentRef student;
     UcClassRef current_class = dataset_.findUcClass("", "");
     UcClassRef target_class = dataset_.findUcClass("", "");
     Request::Type type;
-    int option = receiveOption(NUM_OPTIONS);
     int student_code;
+    int option = receiveOption(NUM_OPTIONS);
     switch (option) {
         case Option::ADD:
             type = Request::ADD;
-            student_code = receiveStudentCode();
-            if (student_code == -1)
+            student = receiveStudentCode();
+            if (student == dataset_.getStudents().end())
                 return;
-            cout << "Please enter the UC code of the UcClass you want to add: ";
-            cin >> uc_code;
-            cout << "Please enter the class code of the UcClass you want to add: ";
-            cin >> class_code;
-            target_class = dataset_.findUcClass(uc_code, class_code);
+            student_code = student->getStudentCode();
+            uc_code = chooseUcMenu();
+            target_class = chooseClassMenu(uc_code);
             cout << "\nRequest submitted sucessfully. ";
             waitForEnter();
             break;
         case Option::REMOVE:
             type = Request::REMOVE;
-            student_code = receiveStudentCode();
-            if (student_code == -1)
+            student = receiveStudentCode();
+            if (student == dataset_.getStudents().end())
                 return;
-            cout << "Please enter the UC code of the UcClass you want to remove: ";
-            cin >> uc_code;
-            cout << "Please enter the class code of the UcClass you want to remove: ";
-            cin >> class_code;
-            current_class = dataset_.findUcClass(uc_code, class_code);
+            student_code = student->getStudentCode();
+            current_class = chooseStudentClassMenu(*student);
             cout << "\nRequest submitted sucessfully. ";
             waitForEnter();
             break;
         case Option::SWITCH:
             type = Request::SWITCH;
-            student_code = receiveStudentCode();
-            if (student_code == -1)
+            student = receiveStudentCode();
+            if (student == dataset_.getStudents().end())
                 return;
-            cout << "Please enter the UC code of the UcClass you want to go from: ";
-            cin >> uc_code;
-            cout << "Please enter the class code of the UcClass you want to go from: ";
-            cin >> class_code;
-            current_class = dataset_.findUcClass(uc_code, class_code);
-            cout << "Please enter the UC code of the UcClass you want to go to: ";
-            cin >> uc_code;
-            cout << "Please enter the class code of the UcClass you want to go to: ";
-            cin >> class_code;
-            target_class = dataset_.findUcClass(uc_code, class_code);
+            student_code = student->getStudentCode();
+            current_class = chooseStudentClassMenu(*student);
+            uc_code = chooseUcMenu();
+            target_class = chooseClassMenu(uc_code);
             cout << "\nRequest submitted sucessfully. ";
             waitForEnter();
             break;
@@ -198,11 +189,80 @@ void Menu::requestMenu() const {
         dataset_.getArchivedRequests().emplace(type, student_code, current_class, target_class);
 }
 
-void Menu::saveMenu() const {
-    if (!dataset_.getPendentRequests().empty())
-        cout << "\nSaved the following changes:\n";
-    dataset_.saveChanges();
+void Menu::saveMenu() {
+    queue<Request>& pendent_requests = dataset_.getPendentRequests();
+    if (pendent_requests.empty()) {
+        cout << "\nNo requests were made\n" << endl;
+        return;
+    }
+
+    while (!pendent_requests.empty()) {
+        performRequest(pendent_requests.front());
+        pendent_requests.pop();
+    }
+    dataset_.saveChangesToFile();
     waitForEnter();
+}
+
+void Menu::performRequest(const Request& request) {
+    int student_code = request.getStudentCode();
+    Student student = *dataset_.searchStudentByCode(student_code);
+    string message, problem_uc_code;
+    switch (request.getType()) {
+        case Request::ADD:
+            if (dataset_.canAdd(request, message)) {
+                cout << "Adding student name " << student.getStudentName() << " to class " <<
+                     request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << endl;
+                if (dataset_.addBalanceDisturbance(*request.getTargetClass())) {
+                    cout << "This will cause imbalance in UC " << request.getTargetClass()->getUcCode() << ". ";
+                    if (!confirm())
+                        return;
+                }
+                dataset_.addUcClass(request, student_code);
+            } else {
+                cout << "Student named " << student.getStudentName() << " failed to enter class "
+                     << request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << ": "
+                     << message << endl;
+            }
+            break;
+        case Request::REMOVE:
+            if (dataset_.canRemove(request, message)) {
+                cout << "Removing student named " << student.getStudentName() << " from class " <<
+                     request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << endl;
+                if (dataset_.removeBalanceDisturbance(*request.getCurrentClass())) {
+                    cout << "This will cause imbalance in UC " << request.getCurrentClass()->getUcCode() << ". ";
+                    if (!confirm())
+                        return;
+                }
+                dataset_.removeUcClass(request, student_code);
+            } else {
+                cout << "Student named " << student.getStudentName() << " failed to leave class "
+                     << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << ": "
+                     << message << endl;
+            }
+            break;
+        case Request::SWITCH:
+            if (dataset_.canSwitch(request, message)) {
+                cout << "Switching student named " << student.getStudentName() << " from class " <<
+                     request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() <<
+                     " to class " << request.getTargetClass()->getUcCode() << '-'
+                     << request.getTargetClass()->getClassCode() << endl;
+                if (dataset_.switchBalanceDisturbance(*request.getCurrentClass(), *request.getTargetClass(), problem_uc_code)) {
+                    cout << "This will cause imbalance in UC " << request.getTargetClass()->getUcCode() << ". ";
+                    if (!confirm())
+                        return;
+                }
+
+                dataset_.removeUcClass(request, student_code);
+                dataset_.addUcClass(request, student_code);
+            } else {
+                cout << "Student named " << student.getStudentName() << " failed to go from class "
+                     << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode()
+                     << " to class " << request.getTargetClass()->getUcCode() << '-'
+                     << request.getTargetClass()->getClassCode() << ": " << message << endl;
+            }
+            break;
+    }
 }
 
 Menu::SortOption Menu::sortMenu() {
@@ -221,23 +281,23 @@ Menu::SortOption Menu::sortMenu() {
     return (SortOption) receiveOption(NUM_OPTIONS);
 }
 
-int Menu::receiveStudentCode() const {
+StudentRef Menu::receiveStudentCode() const {
     int code;
     cout << "Please enter the student's code (press q to quit): ";
     while (!(cin >> code)) {
         cin.clear();
         if (getchar() == 'q')
-            return -1;
+            return dataset_.getStudents().end();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Invalid student code. Please enter another student code (press q to quit): ";
     }
 
-    if (dataset_.searchStudentByCode(code) == dataset_.getStudents().end()) {
+    StudentRef studentRef = dataset_.searchStudentByCode(code);
+    if (studentRef == dataset_.getStudents().end()) {
         cout << "Student could not be found. ";
         waitForEnter();
-        return -1;
     }
-    return code;
+    return studentRef;
 }
 
 void Menu::chooseScheduleMenu() const {
@@ -260,12 +320,19 @@ void Menu::chooseScheduleMenu() const {
 
     cout << chooseScheduleFile.rdbuf();
 
+    StudentRef student;
     switch (receiveOption(NUM_OPTIONS)) {
         case Option::STUDENT_DIAGRAM:
-            displayDiagramSchedule(*dataset_.searchStudentByCode(receiveStudentCode()));
+            student = receiveStudentCode();
+            if (student == dataset_.getStudents().end())
+                return;
+            displayDiagramSchedule(*student);
             break;
         case Option::STUDENT_VISUAL:
-            displayVisualSchedule(*dataset_.searchStudentByCode(receiveStudentCode()));
+            student = receiveStudentCode();
+            if (student == dataset_.getStudents().end())
+                return;
+            displayVisualSchedule(*student);
             break;
         case Option::CLASS_DIAGRAM:
             displayDiagramSchedule(chooseClassWithYearMenu());
@@ -290,9 +357,9 @@ void Menu::displayDiagramSchedule(const string& class_code) const {
          << " │                                                                                       │\n"
          << " │  " << left << setw(85) << "Class: " + class_code << "│\n"
          << " │                                                                                       │\n";
-    for (const UcClass& uc_class: dataset_.getUcClassesByClassCode(class_code)) {
-        cout << " │  " << left << setw(85) << uc_class.getUcCode() + ":" << "│\n";
-        for (const Lesson& lesson: uc_class.getLessons()) {
+    for (UcClassConstRef uc_class: dataset_.getUcClassesByClassCode(class_code)) {
+        cout << " │  " << left << setw(85) << uc_class->getUcCode() + ":" << "│\n";
+        for (const Lesson& lesson: uc_class->getLessons()) {
             ostringstream lesson_str;
             lesson_str << WEEKDAY_TO_STR.at(lesson.getWeekday())
                        << ' ' << lesson.getFormattedStart()
@@ -324,7 +391,7 @@ void Menu::displayDiagramSchedule(const Student &student) const {
          << " │                                                                                       │\n";
 
 
-    for (UcClassRef uc_class: student.getUcClasses()) {
+    for (UcClassConstRef uc_class: student.getUcClasses()) {
         cout << " │  " << left << setw(85) << uc_class->getUcCode() + " - " + uc_class->getClassCode() + ":" << "│\n";
         for (const Lesson& lesson: uc_class->getLessons()) {
             ostringstream lesson_str;
@@ -353,12 +420,12 @@ void Menu::displayVisualSchedule(const string &class_code) const {
     static const int NUM_ROWS = 24;
 
     vector<vector<string>> schedule_cells(NUM_ROWS, vector<string>(NUM_COLUMNS, ""));
-    for (const UcClass& uc_class: dataset_.getUcClassesByClassCode(class_code)) {
-        for (const Lesson& lesson: uc_class.getLessons()) {
+    for (UcClassConstRef uc_class: dataset_.getUcClassesByClassCode(class_code)) {
+        for (const Lesson& lesson: uc_class->getLessons()) {
             int column = lesson.getWeekday();
             int start = (int)(lesson.getStart() * 2.0) - 16, end = (int)(lesson.getEnd() * 2.0) - 16;
             for (int row = start; row < end; row++) {
-                schedule_cells[row][column] = uc_class.getUcCode() + " (" + TYPE_TO_STR.at(lesson.getType()) + ')';
+                schedule_cells[row][column] = uc_class->getUcCode() + " (" + TYPE_TO_STR.at(lesson.getType()) + ')';
             }
         }
     }
@@ -424,7 +491,7 @@ void Menu::displayVisualSchedule(const Student &student) const {
     static const int NUM_ROWS = 24;
 
     vector<vector<string>> schedule_cells(NUM_ROWS, vector<string>(NUM_COLUMNS, ""));
-    for (UcClassRef uc_class: student.getUcClasses()) {
+    for (UcClassConstRef uc_class: student.getUcClasses()) {
         for (const Lesson& lesson: uc_class->getLessons()) {
             int column = lesson.getWeekday();
             int start = (int)(lesson.getStart() * 2.0) - 16, end = (int)(lesson.getEnd() * 2.0) - 16;
@@ -488,6 +555,29 @@ void Menu::displayVisualSchedule(const Student &student) const {
     waitForEnter();
 }
 
+UcClassRef Menu::chooseStudentClassMenu(const Student& student) {
+    clearScreen();
+    cout << '\n'
+         << " ┌─ Choose the student class ────────────────────────────────────────────────────────────┐\n"
+         << " │                                                                                       │\n"
+         << " │  Options:                                                                             │\n";
+    list<UcClassConstRef> classes = student.getUcClasses();
+    int i = 1;
+    for (auto it = classes.begin(); it != classes.end(); it++) {
+        ostringstream option_str;
+        option_str << '[' << i << "] " << (*it)->getUcCode() << '-' << (*it)->getClassCode();
+        cout << " │    " << left << setw(83) << option_str.str() << "│\n";
+        i++;
+    }
+    cout << " │                                                                                       │\n"
+         << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    auto it = classes.begin();
+    for (i = receiveOption((int)classes.size()); i > 1; i++)
+        it++;
+    vector<UcClass>& uc_classes = dataset_.getUcClasses();
+    return equal_range(uc_classes.begin(), uc_classes.end(), **it).first;
+}
+
 string Menu::chooseUcMenu() const {
     clearScreen();
     cout << '\n'
@@ -505,16 +595,33 @@ string Menu::chooseUcMenu() const {
     return uc_codes[receiveOption((int)uc_codes.size()) - 1];
 }
 
-UcClass Menu::chooseClassMenu(const string& uc_code) const {
+UcClassConstRef Menu::chooseClassMenu(const string& uc_code) const {
     clearScreen();
     cout << '\n'
          << " ┌─ Choose a class ──────────────────────────────────────────────────────────────────────┐\n"
          << " │                                                                                       │\n"
          << " │  Options:                                                                             │\n";
-    vector<UcClass> classes = dataset_.getClassesByUcCode(uc_code);
+    vector<UcClassRef> classes = dataset_.getClassesByUcCode(uc_code);
     for (int i = 0; i < classes.size(); i++) {
         ostringstream option_str;
-        option_str << '[' << i + 1 << "] " << classes[i].getClassCode();
+        option_str << '[' << i + 1 << "] " << classes[i]->getClassCode();
+        cout << " │    " << left << setw(83) << option_str.str() << "│\n";
+    }
+    cout << " │                                                                                       │\n"
+         << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    return classes[receiveOption((int)classes.size()) - 1];
+}
+
+UcClassRef Menu::chooseClassMenu(const string& uc_code) {
+    clearScreen();
+    cout << '\n'
+         << " ┌─ Choose a class ──────────────────────────────────────────────────────────────────────┐\n"
+         << " │                                                                                       │\n"
+         << " │  Options:                                                                             │\n";
+    vector<UcClassRef> classes = dataset_.getClassesByUcCode(uc_code);
+    for (int i = 0; i < classes.size(); i++) {
+        ostringstream option_str;
+        option_str << '[' << i + 1 << "] " << classes[i]->getClassCode();
         cout << " │    " << left << setw(83) << option_str.str() << "│\n";
     }
     cout << " │                                                                                       │\n"
@@ -570,8 +677,14 @@ int Menu::receiveOption(int max) {
     return option;
 }
 
+bool Menu::confirm() {
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cout << "Proceed? [Y/N]: ";
+    return toupper(getchar()) == 'Y';
+}
+
 void Menu::waitForEnter() {
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');  // To avoid newlines that were not consumed
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "Press ENTER to continue...";
     getchar();
 }

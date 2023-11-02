@@ -87,5 +87,6 @@ private:
 };
 
 typedef std::vector<UcClass>::iterator UcClassRef;
+typedef std::vector<UcClass>::const_iterator UcClassConstRef;
 
 #endif

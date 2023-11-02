@@ -21,14 +21,14 @@ class Dataset {
   public:
     Dataset();
 
+    std::set<Student>& getStudents();
     const std::set<Student>& getStudents() const;
+    std::vector<UcClass>& getUcClasses();
     const std::vector<UcClass>& getUcClasses() const;
     std::queue<Request>& getPendentRequests();
     const std::queue<Request>& getPendentRequests() const;
     std::stack<Request>& getArchivedRequests();
     const std::stack<Request>& getArchivedRequests() const;
-
-    void readFiles();
 
     /**
      * Reads Uc data from a file and populates the dataset.
@@ -47,7 +47,8 @@ class Dataset {
      * @param code_of_class The class code of the UcClass to find.
      * @return The found UcClass, or an empty one if not found.
      */
-     std::vector<UcClass>::iterator findUcClass(const std::string& uc_code, const std::string& code_of_class);
+    UcClassRef findUcClass(const std::string& uc_code, const std::string& code_of_class);
+    UcClassConstRef findUcClass(const std::string& uc_code, const std::string& code_of_class) const;
 
     /**
      * Searches for students in the dataset based on their admission year.
@@ -108,9 +109,11 @@ class Dataset {
     bool addBalanceDisturbance(const UcClass& uc_class) const;
     bool removeBalanceDisturbance(const UcClass& uc_class) const;
     bool switchBalanceDisturbance(const UcClass& from, const UcClass& dest, std::string& problem_uc_code) const;
+    void saveChangesToFile() const;
 
     bool isClassFull(const UcClass& uc_class) const;
-    std::vector<UcClass> getClassesInUc(const std::string& uc_code) const;
+    std::vector<UcClassConstRef> getClassesInUc(const std::string& uc_code) const;
+    std::vector<UcClassRef> getClassesInUc(const std::string& uc_code);
 
     void saveChanges();
 
@@ -124,9 +127,11 @@ class Dataset {
      */
     std::vector<Lesson> getStudentLessons(const Student& student) const;
 
-    std::vector<UcClass> getUcClassesByClassCode(const std::string& class_code) const;
+    std::vector<UcClassConstRef> getUcClassesByClassCode(const std::string& class_code) const;
+    std::vector<UcClassRef> getUcClassesByClassCode(const std::string& class_code);
     std::vector<std::string> getUcCodes() const;
-    std::vector<UcClass> getClassesByUcCode(const std::string& uc_code) const;
+    std::vector<UcClassConstRef> getClassesByUcCode(const std::string& uc_code) const;
+    std::vector<UcClassRef> getClassesByUcCode(const std::string& uc_code);
     std::vector<std::string> getClassCodesByYear(int year) const;
 
 private:

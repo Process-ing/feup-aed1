@@ -24,7 +24,7 @@ class Menu {
     /**
      * @brief Launches the menu, starting on the welcome screen.
      */
-    void launch() const;
+    void launch();
 
   private:
     enum SortOption {
@@ -37,8 +37,9 @@ class Menu {
     Dataset &dataset_;
 
     void searchMenu() const;
-    void requestMenu() const;
-    void saveMenu() const;
+    void requestMenu();
+    void saveMenu();
+    void performRequest(const Request& request);
     static SortOption sortMenu();
     void chooseScheduleMenu() const;
     void displayDiagramSchedule(const std::string& class_code) const;
@@ -46,11 +47,14 @@ class Menu {
     void displayVisualSchedule(const std::string& class_code) const;
     void displayVisualSchedule(const Student& student) const;
     std::string chooseUcMenu() const;
-    UcClass chooseClassMenu(const std::string& uc_code) const;
+    UcClassConstRef chooseClassMenu(const std::string& uc_code) const;
+    UcClassRef chooseClassMenu(const std::string& uc_code);
     std::string chooseClassWithYearMenu() const;
+    UcClassRef chooseStudentClassMenu(const Student& student);
 
-    int receiveStudentCode() const;
+    StudentRef receiveStudentCode() const;
     static int receiveOption(int max);
+    static bool confirm();
     static void waitForEnter();
     static void clearScreen();
 };
