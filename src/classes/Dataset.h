@@ -36,16 +36,10 @@ public:
     const std::stack<Request>& getArchivedRequests() const;
 
     /**
-     * @brief Reads data files and populates the dataset.
-     * @author Diogo Vieira and Bruno Oliveira
-     */
-    void readUcs();
-
-    /**
      * @brief Reads Uc data from a file and populates the dataset.
      * @author Diogo Vieira
      */
-    void readClasses();
+    void readUcs();
 
     /**
      * @brief Reads UcClasses data from a file and populates the dataset.
@@ -128,9 +122,6 @@ public:
     std::vector<UcClassConstRef> getClassesInUc(const std::string& uc_code) const;
     std::vector<UcClassRef> getClassesInUc(const std::string& uc_code);
 
-    void saveChanges();
-
-
     /**
      * @brief Returns the lessons of the student, based on its classes and sorted by start time.
      * Complexity: O(m*n), where m is the number of classes of the student and n is the max number of lessons
@@ -139,6 +130,14 @@ public:
      * @return Student's lessons
      */
     std::vector<Lesson> getStudentLessons(const Student& student) const;
+
+    /**
+     * @brief Searches for students in the dataset based on their academic year.
+     * @param year The academic year to search for in student registration codes.
+     * @return A vector of students whose academic year matches the specified year.
+     * @author Diogo Vieira and Bruno Oliveira
+     */
+    std::vector<Student> searchStudentsByAcademicYear(int year) const;
 
     std::vector<UcClassConstRef> getUcClassesByClassCode(const std::string& class_code) const;
     std::vector<UcClassRef> getUcClassesByClassCode(const std::string& class_code);

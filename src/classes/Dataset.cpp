@@ -187,9 +187,6 @@ void Dataset::readStudents() {
         current_student.getUcClasses().emplace_back(uc_class);
         max_class_capacity_ = max(max_class_capacity_, uc_class->incrementNumberOfStudents());
     }
-
-    for (const Student& student: students_)
-        cout << student.getStudentName() << endl;
 }
 
 queue<Request>& Dataset::getPendentRequests() {
@@ -483,12 +480,22 @@ vector<string> Dataset::getClassCodesByYear(int year) const {
     }
     return { res.begin(), res.end() };
 }
+
 vector<UcClassConstRef> Dataset::getClassesInUc(const std::string &uc_code) const {
     vector<UcClassConstRef> res;
     UcClassConstRef it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
     while (it != uc_classes_.end() && it->getUcCode() == uc_code) {
         res.push_back(it);
         it++;
+    }
+    return res;
+}
+
+vector<Student> Dataset::searchStudentsByAcademicYear(int year) const {
+    vector<Student> res;
+    for (const Student& student: students_) {
+        if (student.getAcademicYear() == year)
+            res.push_back(student);
     }
     return res;
 }

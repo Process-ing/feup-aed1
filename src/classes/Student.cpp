@@ -30,7 +30,7 @@ bool Student::operator<(const Student &student) const{
 
 int Student::getAcademicYear() const {
     int res = -1;
-    for (UcClassRef uc_class: uc_classes_)
+    for (UcClassConstRef uc_class: uc_classes_)
         res = max(res, uc_class->getAcademicYear());
     return res;
 }
@@ -97,8 +97,4 @@ bool Student::lessonsOverlapsWith(const Lesson &lesson, const UcClass& class_to_
         it++;
     }
     return false;
-}
-
-bool Student::operator<(const Student &student) const {
-    return this->student_code_ < student.student_code_;
 }
