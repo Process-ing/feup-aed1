@@ -68,6 +68,8 @@ public:
      * @author Diogo Vieira
      */
     bool operator==(const UcClass& other) const;
+
+    int getAcademicYear() const;
 private:
     std::string uc_code_;
     std::string class_code_;

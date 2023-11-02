@@ -10,15 +10,15 @@
 #include <string>
 #include <set>
 
-typedef std::vector<UcClass>::const_iterator UcClassRef;
+typedef std::vector<UcClass>::iterator UcClassRef;
 
 class Student {
-private:
+  private:
     int student_code_;
     std::string student_name_;
     std::list<UcClassRef> uc_classes_;
     int max_class_capacity_ = 0;
-public:
+  public:
     /**
      * @brief Constructor of the class.
      * @author João Mendes
@@ -35,5 +35,7 @@ public:
     bool hasClass(const UcClass& uc_class) const;
     bool operator<(const Student &student) const;
 };
+
+typedef std::set<Student>::iterator StudentRef;
 
 #endif //FEUP_AED1_STUDENT_H
