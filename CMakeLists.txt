@@ -3,8 +3,8 @@ project(feup-aed1)
 
 set(CMAKE_CXX_STANDARD 11)
 
-file(COPY dataset/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY src/menus/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/menus)
+file(COPY dataset/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/dataset/)
+file(COPY src/menus/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/menus/)
 
 include_directories(${PROJECT_SOURCE_DIR}/src/classes)
 include_directories(${PROJECT_SOURCE_DIR}/src)

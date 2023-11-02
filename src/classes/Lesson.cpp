@@ -35,6 +35,11 @@ bool Lesson::overlaps(const Lesson &lesson) const {
     return weekday_ == lesson.weekday_ && start_ < lesson.end_ && lesson.start_ < this->end_;
 }
 
+bool Lesson::isCompatibleWith(const Lesson &lesson) const {
+    return type_ == T || lesson.type_ == T;
+}
+
+
 string Lesson::formatTime(double time) {
     ostringstream res;
     res << (int)time << ':' << setfill('0') << setw(2) << (int)((time - (int)time) * 60);

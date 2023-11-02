@@ -8,8 +8,11 @@
 
 #include <set>
 #include <map>
+#include <queue>
+#include <stack>
 #include "Student.h"
 #include "UcClass.h"
+#include "Request.h"
 
 /**
  * @brief Class that stores all dataset information and performs all actions on it.
@@ -18,10 +21,14 @@ class Dataset {
   public:
     Dataset();
 
+    std::set<Student>& getStudents();
     const std::set<Student>& getStudents() const;
+    std::vector<UcClass>& getUcClasses();
     const std::vector<UcClass>& getUcClasses() const;
-
-    void readFiles();
+    std::queue<Request>& getPendentRequests();
+    const std::queue<Request>& getPendentRequests() const;
+    std::stack<Request>& getArchivedRequests();
+    const std::stack<Request>& getArchivedRequests() const;
 
     /**
      * Reads Uc data from a file and populates the dataset.
@@ -40,7 +47,8 @@ class Dataset {
      * @param code_of_class The class code of the UcClass to find.
      * @return The found UcClass, or an empty one if not found.
      */
-     std::vector<UcClass>::iterator findUcClass(const std::string& uc_code, const std::string& code_of_class);
+    UcClassRef findUcClass(const std::string& uc_code, const std::string& code_of_class);
+    UcClassConstRef findUcClass(const std::string& uc_code, const std::string& code_of_class) const;
 
     /**
      * Searches for students in the dataset based on their admission year.
@@ -72,7 +80,7 @@ class Dataset {
      * @param student_code The student code to search for.
      * @return A vector containing the found student(s) with the given code, which may be empty if no student matches the code.
      */
-    std::set<Student>::iterator searchStudentByCode(int student_code) const;
+    StudentRef searchStudentByCode(int student_code) const;
 
     /**
      * Searches for students enrolled in a specific UC by its unique code.
@@ -92,6 +100,24 @@ class Dataset {
 
     void readStudents();
 
+    void perform(const Request& request);
+    bool canAdd(const Request& request, std::string& message) const;
+    bool canRemove(const Request& request, std::string& message) const;
+    bool canSwitch(const Request& request, std::string& message) const;
+    void addUcClass(const Request& request, int student_code);
+    void removeUcClass(const Request& request, int student_code);
+    bool addBalanceDisturbance(const UcClass& uc_class) const;
+    bool removeBalanceDisturbance(const UcClass& uc_class) const;
+    bool switchBalanceDisturbance(const UcClass& from, const UcClass& dest, std::string& problem_uc_code) const;
+    void saveChangesToFile() const;
+
+    bool isClassFull(const UcClass& uc_class) const;
+    std::vector<UcClassConstRef> getClassesInUc(const std::string& uc_code) const;
+    std::vector<UcClassRef> getClassesInUc(const std::string& uc_code);
+
+    void saveChanges();
+
+
     /**
      * @brief Returns the lessons of the student, based on its classes and sorted by start time.
      * Complexity: O(m*n), where m is the number of classes of the student and n is the max number of lessons
@@ -101,14 +127,19 @@ class Dataset {
      */
     std::vector<Lesson> getStudentLessons(const Student& student) const;
 
-    std::vector<UcClass> getUcClassesByClassCode(const std::string& class_code) const;
+    std::vector<UcClassConstRef> getUcClassesByClassCode(const std::string& class_code) const;
+    std::vector<UcClassRef> getUcClassesByClassCode(const std::string& class_code);
     std::vector<std::string> getUcCodes() const;
-    std::vector<UcClass> getClassesByUcCode(const std::string& uc_code) const;
+    std::vector<UcClassConstRef> getClassesByUcCode(const std::string& uc_code) const;
+    std::vector<UcClassRef> getClassesByUcCode(const std::string& uc_code);
     std::vector<std::string> getClassCodesByYear(int year) const;
 
 private:
     std::vector<UcClass> uc_classes_;
     std::set<Student> students_;
+    std::queue<Request> pendent_requests_;
+    std::stack<Request> archived_requests_;
+    int max_class_capacity_;
 };
 
 #endif //FEUP_AED1_DATASET_H

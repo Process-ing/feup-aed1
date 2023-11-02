@@ -9,7 +9,6 @@
 #include <string>
 
 #include "UcClass.h"
-#include "Dataset.h"
 #include "Student.h"
 
 /**
@@ -29,18 +28,18 @@ class Request {
         SWITCH
     };
 
-    Request(Type type, Student& student, UcClass& target_class);
-
-    void perform(Dataset& dataset);
+    Request(Type type, int student_code, UcClassRef current_class, UcClassRef target_class);
 
     Type getType() const;
-    const Student& getStudent() const;
-    const UcClass& getTargetClass() const;
+    int getStudentCode() const;
+    UcClassRef getCurrentClass() const;
+    UcClassRef getTargetClass() const;
 
   private:
     Type type_;
-    Student* student_;
-    UcClass* target_class_;
+    int student_code_;
+    UcClassRef current_class_;
+    UcClassRef target_class_;
 };
 
 
