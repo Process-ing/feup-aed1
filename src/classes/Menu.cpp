@@ -10,6 +10,7 @@
 #include "Menu.h"
 #include "Request.h"
 #include "Student.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -91,7 +92,7 @@ void Menu::searchMenu() const {
         case Option::ALL_STUDENTS:{
             set<Student> all_students_set = dataset_.getStudents();
             vector<Student> all_students(all_students_set.begin(), all_students_set.end());
-            sortStudents(sortMenu(), all_students);
+            sortMenu(all_students);
             displayStudentsNameAndCode(all_students);
             break;
         }
@@ -307,9 +308,17 @@ void Menu::performRequest(const Request& request) {
     }
 }
 
-Menu::SortOption Menu::sortMenu() {
+void Menu::sortMenu(std::vector<Student>& students) {
     const static string SORT_MENU_FILEPATH = "src/menus/sort_menu.txt";
-    const static int NUM_OPTIONS = 4;
+    const static int NUM_OPTIONS = 6;
+    enum Option {
+        ALPHABETICAL_ORDER = 1,
+        REVERSE_ALPHABETICAL_ORDER = 2,
+        ASCENDING_CODES = 3,
+        DESCENDING_CODES = 4,
+        ASCENDING_NUM_UCS = 5,
+        DESCENDING_NUM_UCS = 6,
+    };
 
     clearScreen();
     ifstream sort_menu_file(SORT_MENU_FILEPATH);
@@ -320,7 +329,27 @@ Menu::SortOption Menu::sortMenu() {
     }
 
     cout << sort_menu_file.rdbuf();
-    return (SortOption) receiveOption(NUM_OPTIONS);
+    int option = receiveOption(NUM_OPTIONS);
+
+    switch (option) {
+        case Option::ALPHABETICAL_ORDER:
+            sortByAlphabeticalOrder(students);
+            break;
+        case Option::REVERSE_ALPHABETICAL_ORDER:
+            sortByReverseAlphabeticalOrder(students);
+            break;
+        case Option::ASCENDING_CODES:
+            break; // students are, by default, sorted by ascending student codes
+        case Option::DESCENDING_CODES:
+            reverse(students.begin(), students.end());
+            break;
+        case Option::ASCENDING_NUM_UCS:
+            sortByAscendingNumOfUcs(students);
+            break;
+        case Option::DESCENDING_NUM_UCS:
+            sortByDescendingNumOfUcs(students);
+            break;
+    }
 }
 
 StudentRef Menu::receiveStudentCode() const {
@@ -731,187 +760,255 @@ void Menu::waitForEnter() {
     getchar();
 }
 
-void Menu::sortStudents(Menu::SortOption sortingOption, vector<Student>& students) const {
-    const static int NUM_OPTIONS = 4;
-    switch (sortingOption) {
-        case SortOption::ALPHABETICAL_ORDER:
-            sort(students.begin(), students.end(), [](const Student &a, const Student &b) {
-                return a.getStudentName() < b.getStudentName();
-            });
-            break;
-        case SortOption::REVERSE_ALPHABETICAL_ORDER:
-            sort(students.begin(), students.end(), [](const Student &a, const Student &b) {
-                return a.getStudentName() > b.getStudentName();
-            });
-            break;
-        case SortOption::ASCENDING_CODES:
-            sort(students.begin(), students.end(), [](const Student &a, const Student &b) {
-                return a.getStudentCode() < b.getStudentCode();
-            });
-            break;
-        case SortOption::DESCENDING_CODES:
-            sort(students.begin(), students.end(), [](const Student &a, const Student &b) {
-                return a.getStudentCode() > b.getStudentCode();
-            });
-            break;
-    }
-}
-
 
 void Menu::searchStudentByCode() const {
-    int student_code;
-    cout << "Enter the student code: ";
-    cin >> student_code;
-    const std::set<Student>& students = dataset_.getStudents();
-    auto student_by_code = students.find(Student(student_code, ""));
-    if (student_by_code != students.end()) {
-        displayStudent(*student_by_code);
-    }
+    StudentRef student = receiveStudentCode();
+    displayStudent(*student);
 }
 
 void Menu::searchStudentByUc() const {
-    string uc_code;
-    cout << "Enter the UC code: ";
-    cin >> uc_code;
+    string uc_code = chooseUcMenu();
     vector<Student> students_in_uc = dataset_.searchStudentsInUC(uc_code);
-    sortStudents(sortMenu(), students_in_uc);
+    sortMenu(students_in_uc);
     displayStudentsNameAndCode(students_in_uc);
 }
 
 void Menu::searchStudentsByClass() const {
-    string class_code;
-    cout << "Enter the class code: ";
-    cin >> class_code;
+    string class_code = chooseClassWithYearMenu();
     vector<Student> students_in_class = dataset_.searchStudentsInClass(class_code);
-    sortStudents(sortMenu(), students_in_class);
+    sortMenu(students_in_class);
     displayStudentsNameAndCode(students_in_class);
 }
 
 void Menu::searchStudentInAtLeastNUcs() const {
     int n;
-    cout << "Enter the minimum number of UCs: ";
-    cin >> n;
+    cout << "Please enter the minimum number of UCs: ";
+    while (!(cin >> n)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid number of UCs. Please enter the minimum number of UCs: ";
+    }
     vector<Student> students_in_at_least_n_ucs = dataset_.searchStudentsInAtLeastNUCs(n);
-    sortStudents(sortMenu(), students_in_at_least_n_ucs);
+    sortMenu(students_in_at_least_n_ucs);
     displayStudentsNameAndCode(students_in_at_least_n_ucs);
 }
 
 void Menu::searchStudentsByAdmissionYear() const {
     int year;
-    cout << "Enter the admission year: ";
-    cin >> year;
+    cout << "Please insert the year: ";
+    while (!(cin >> year)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid year. Please insert a year: ";
+    }
     vector<Student> students_by_year = dataset_.searchStudentsByAdmissionYear(year);
-    sortStudents(sortMenu(), students_by_year);
+    sortMenu(students_by_year);
     displayStudentsNameAndCode(students_by_year);
 }
 
 void Menu::searchStudentsByAcademicYear() const{
     int year;
-    cout << "Enter the academic year: ";
-    cin >> year;
+    cout << "Please insert the year: ";
+    while (!(cin >> year)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid year. Please insert a year: ";
+    }
     vector<Student> students_by_academic_year = dataset_.searchStudentsByAcademicYear(year);
-    sortStudents(sortMenu(), students_by_academic_year);
+    sortMenu(students_by_academic_year);
     displayStudentsNameAndCode(students_by_academic_year);
 }
 
 void Menu::searchStudentsInUcClass() const {
-    string uc_code, class_code;
-    cout << "Enter the UC code: ";
-    cin >> uc_code;
-    cout << "Enter the class code: ";
-    cin >> class_code;
-    UcClass uc_class(uc_code, class_code);
-    vector<Student> students_in_ucclass = dataset_.searchStudentsByUcClass(uc_class);
-    sortStudents(sortMenu(), students_in_ucclass);
-    displayStudentsNameAndCode(students_in_ucclass);
+    string uc_code = chooseUcMenu();
+    auto uc_class = chooseClassMenu(uc_code);
+    vector<Student> students_in_uc_class = dataset_.searchStudentsByUcClass(*uc_class);
+    sortMenu(students_in_uc_class);
+    displayStudentsNameAndCode(students_in_uc_class);
 }
 
-void Menu::displayStudent(const Student student) const {
-    cout << "-----------------" << endl;
-    cout << "Student Name: " << student.getStudentName() << endl;
-    cout << "Student Code: " << student.getStudentCode() << endl;
-    cout << "-----------------" << endl;
+void Menu::displayStudent(const Student& student) const {
+    clearScreen();
+    cout << "\n"
+         << " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
+         << " │                                                                                       │\n"
+         << " │  Student code: " << left << setw(71) << student.getStudentCode() << "│\n"
+         << " │  Student name: " << left << setw(71) << student.getStudentName() << "│\n"
+         << " │                                                                                       │\n"
+            " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    waitForEnter();
 }
 
 void Menu::displayStudentsNameAndCode(const vector<Student>& students) const {
     if (students.empty()) {
+        cout << "No students where found meeting this criteria. ";
+        waitForEnter();
         return;
     }
-    int max_results = 10;
-    int page = 0;
-    int total_pages = (students.size() + max_results - 1) / max_results;
 
-    while (page < total_pages) {
-        cout << "Page " << (page + 1) << " of " << total_pages << ":" << endl;
-        cout << "-----------------" << endl;
+    static const int RESULTS_PER_PAGE = 10;
+    enum Option {
+        NEXT_PAGE = 1,
+        PREVIOUS_PAGE = 2,
+        GO_BACK = 3,
+    };
+    int page = 1;
+    int total_pages = ceil((double)students.size() / RESULTS_PER_PAGE);
 
-        for (int i = page * max_results; i < min((page + 1) * max_results, static_cast<int>(students.size())); i++) {
-            const Student &student = students[i];
-            cout << "Student Name: " << student.getStudentName() << endl;
-            cout << "Student Code: " << student.getStudentCode() << endl;
-            cout << "-----------------" << endl;
-        }
+    while (true) {
+        clearScreen();
+        cout << "\n"
+                " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
+                " │                                                                                       │\n";
 
-        if (page < total_pages - 1) {
-            cout << "[1] Next page" << endl;
-        }
+        for (int i = (page - 1) * RESULTS_PER_PAGE; i < min(page * RESULTS_PER_PAGE, (int)students.size()); i++)
+            cout << " │  Code: " << left << setw(79)
+                 << to_string(students[i].getStudentCode()) + ", Name: " + students[i].getStudentName() << "│\n";
 
-        if (page > 0) {
-            cout << "[2] Previous page" << endl;
-        }
+        cout << " │                                                                                       │\n"
+                " │  Page " << setw(80) << to_string(page) + " of " + to_string(total_pages) << "│\n";
+        if (page < total_pages)
+            cout << " │     [1] Next page                                                                     │\n";
 
-        cout << "[3] Go back" << endl;
-        cout << "_________________________" << endl;
-        cout << "Choose an option: ";
+        if (page > 1)
+            cout << " │     [2] Previous page                                                                 │\n";
+
+        cout << " │     [3] Go back                                                                       │\n"
+                " │                                                                                       │\n"
+                " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+
 
         int option;
-        cin >> option;
+        cout << "Please choose an option: ";
+        bool valid_option = false;
+        while (true) {
+            if (!(cin >> option)) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid option. Please choose another option: ";
+                continue;
+            }
 
-        if (option == 1 && page < total_pages - 1) {
-            page++;
-        } else if (option == 2 && page > 0) {
-            page--;
-        } else if (option == 3) {
-            break;
+            switch (option) {
+                case Option::NEXT_PAGE:
+                    if (page < total_pages) {
+                        page++;
+                        valid_option = true;
+                    } else {
+                        valid_option = false;
+                    }
+                    break;
+                case Option::PREVIOUS_PAGE:
+                    if (page > 1) {
+                        page--;
+                        valid_option = true;
+                    } else {
+                        valid_option = false;
+                    }
+                    break;
+                case Option::GO_BACK:
+                    return;
+            }
+            if (valid_option)
+                break;
+            cout << "Invalid option. Please choose another option: ";
         }
-        cin.ignore();
     }
 }
 
 void Menu::displayUcs() const {
+    vector<string> uc_codes = dataset_.getUcCodes();
     if (dataset_.getUcClasses().empty()) {
-        cout << "No UC classes found." << endl;
+        cout << "No UC classes found. ";
+        waitForEnter();
         return;
     }
-    cout << "List of UC Classes:" << endl;
-    cout << "-----------------" << endl;
-    string prev_uc_code;
-    for (const UcClass& uc_class : dataset_.getUcClasses()) {
-        if (uc_class.getUcCode() != prev_uc_code) {
-            cout << "UC Code: " << uc_class.getUcCode() << endl;
-            cout << "-----------------" << endl;
-            prev_uc_code = uc_class.getUcCode();
-        }
-    }
+    cout << "\n"
+            " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
+            " │                                                                                       │\n";
+
+    for (const string& uc_code : uc_codes)
+        cout << " │  " << left << setw(85) << uc_code <<  "│\n";
+
+    cout << " │                                                                                       │\n"
+            " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    waitForEnter();
 }
 
 void Menu::displayClasses() const {
-    if (dataset_.getUcClasses().empty()) {
-        cout << "No classes found." << endl;
+    vector<string> class_codes = dataset_.getAllClassCodes();
+    if (class_codes.empty()) {
+        cout << "No classes found. ";
+        waitForEnter();
         return;
     }
-    cout << "List of Classes:" << endl;
-    cout << "-----------------" << endl;
 
-    string prev_uc_class;
+    static const int RESULTS_PER_PAGE = 10;
+    enum Option {
+        NEXT_PAGE = 1,
+        PREVIOUS_PAGE = 2,
+        GO_BACK = 3,
+    };
+    int page = 1;
+    int total_pages = ceil((double)class_codes.size() / RESULTS_PER_PAGE);
 
-    for (const UcClass& ucClass : dataset_.getUcClasses()) {
-        if (ucClass.getClassCode() != prev_uc_class) {
-            cout << "Class Code: " << ucClass.getClassCode() << endl;
-            cout << "-----------------" << endl;
-            prev_uc_class = ucClass.getClassCode();
+    while (true) {
+        clearScreen();
+        cout << "\n"
+                " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
+                " │                                                                                       │\n";
+
+        for (int i = (page - 1) * RESULTS_PER_PAGE; i < min(page * RESULTS_PER_PAGE, (int)class_codes.size()); i++)
+            cout << " │  " << left << setw(85) << class_codes[i] << "│\n";
+
+        cout << " │                                                                                       │\n"
+                " │  Page " << setw(80) << to_string(page) + " of " + to_string(total_pages) << "│\n";
+        if (page < total_pages)
+            cout << " │     [1] Next page                                                                     │\n";
+
+        if (page > 1)
+            cout << " │     [2] Previous page                                                                 │\n";
+
+        cout << " │     [3] Go back                                                                       │\n"
+                " │                                                                                       │\n"
+                " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+
+
+        int option;
+        cout << "Please choose an option: ";
+        bool valid_option = false;
+        while (true) {
+            if (!(cin >> option)) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid option. Please choose another option: ";
+                continue;
+            }
+
+            switch (option) {
+                case Option::NEXT_PAGE:
+                    if (page < total_pages) {
+                        page++;
+                        valid_option = true;
+                    } else {
+                        valid_option = false;
+                    }
+                    break;
+                case Option::PREVIOUS_PAGE:
+                    if (page > 1) {
+                        page--;
+                        valid_option = true;
+                    } else {
+                        valid_option = false;
+                    }
+                    break;
+                case Option::GO_BACK:
+                    return;
+            }
+            if (valid_option)
+                break;
+            cout << "Invalid option. Please choose another option: ";
         }
-
     }
 }
 

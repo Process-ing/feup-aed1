@@ -23,16 +23,6 @@ class Menu {
     explicit Menu(Dataset& dataset);
 
     /**
-     * @brief Enumerates sorting options for student lists.
-     */
-    enum SortOption {
-        ALPHABETICAL_ORDER = 1, ///< Sort students in alphabetical order by name.
-        REVERSE_ALPHABETICAL_ORDER = 2, ///< Sort students in reverse alphabetical order by name.
-        ASCENDING_CODES = 3, ///< Sort students by ascending student codes.
-        DESCENDING_CODES = 4, ///< Sort students by descending student codes.
-    };
-
-    /**
      * @brief Launches the menu, starting with the welcome screen.
      * @author Bruno Oliviera
      */
@@ -105,14 +95,13 @@ class Menu {
      * @param students The list of students to sort.
      * @author Diogo Vieira
      */
-    void sortStudents(SortOption sortingOption, std::vector<Student> &students) const;
 
     /**
      * @brief Displays information about a single student.
      * @param student The student to display.
      * @author Diogo Vieira
      */
-    void displayStudent(const Student student) const;
+    void displayStudent(const Student& student) const;
 
 private:
     /**
@@ -135,7 +124,7 @@ private:
      * @return The selected sorting option.
      * @author Diogo Vieira and Bruno Oliveira
      */
-    static SortOption sortMenu();
+    static void sortMenu(std::vector<Student>& students);
     void chooseScheduleMenu() const;
     void displayDiagramSchedule(const std::string& class_code) const;
     void displayDiagramSchedule(const Student& student) const;

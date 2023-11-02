@@ -104,9 +104,13 @@ UcClassConstRef Dataset::findUcClass(const string& uc_code, const string& class_
 }
 
 vector<Student> Dataset::searchStudentsByAdmissionYear(int year) const {
-    auto first = students_.equal_range(Student(year * 10000, "")).first,
-        last = students_.equal_range(Student((year + 1) * 10000, "")).first;
-    return { first, last };
+    vector<Student> res;
+    auto it = students_.lower_bound(Student(year * 100000, ""));
+    while (it != students_.end() && it->getAdmissionYear() == year) {
+        res.push_back(*it);
+        it++;
+    }
+    return res;
 }
 
 StudentRef Dataset::searchStudentByCode(int student_code) const {
@@ -470,6 +474,13 @@ std::vector<UcClassRef> Dataset::getClassesInUc(const std::string &uc_code) {
         it++;
     }
     return res;
+}
+
+vector<string> Dataset::getAllClassCodes() const {
+    set<string> res;
+    for (const UcClass& uc_class: uc_classes_)
+        res.insert(uc_class.getClassCode());
+    return { res.begin(), res.end() };
 }
 
 vector<string> Dataset::getClassCodesByYear(int year) const {

@@ -28,6 +28,10 @@ bool Student::operator<(const Student &student) const{
     return this->student_code_ < student.student_code_;
 }
 
+int Student::getAdmissionYear() const {
+    return student_code_ / 100000;
+}
+
 int Student::getAcademicYear() const {
     int res = -1;
     for (UcClassConstRef uc_class: uc_classes_)
