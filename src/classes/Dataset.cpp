@@ -213,54 +213,6 @@ const stack<Request>& Dataset::getArchivedRequests() const {
     return archived_requests_;
 }
 
-void Dataset::perform(const Request& request) {
-    int student_code = request.getStudentCode();
-    Student student = *searchStudentByCode(student_code);
-    string message;
-    switch (request.getType()) {
-        case Request::ADD:
-            if (canAdd(request, message)) {
-                cout << "Student named " << student.getStudentName() << " entered class " <<
-                request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << endl;
-
-                addUcClass(request, student_code);
-            } else {
-                cout << "Student named " << student.getStudentName() << " failed to enter class "
-                     << request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << ": "
-                     << message << endl;
-            }
-            break;
-        case Request::REMOVE:
-            if (canRemove(request, message)) {
-                cout << "Student named " << student.getStudentName() << " left class " <<
-                     request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << endl;
-
-                removeUcClass(request, student_code);
-            } else {
-                cout << "Student named " << student.getStudentName() << " failed to leave class "
-                     << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << ": "
-                     << message << endl;
-            }
-            break;
-        case Request::SWITCH:
-            if (canSwitch(request, message)) {
-                cout << "Student named " << student.getStudentName() << " went from class " <<
-                     request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() <<
-                     " to UcClass " << request.getTargetClass()->getUcCode() << '-'
-                     << request.getTargetClass()->getClassCode() << endl;
-
-                removeUcClass(request, student_code);
-                addUcClass(request, student_code);
-            } else {
-                cout << "Student named " << student.getStudentName() << " failed to go from class "
-                     << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode()
-                     << " to class " << request.getTargetClass()->getUcCode() << '-'
-                     << request.getTargetClass()->getClassCode() << ": " << message << endl;
-            }
-            break;
-    }
-}
-
 bool Dataset::canAdd(const Request& request, string& message) const {
     const Student& student = *searchStudentByCode(request.getStudentCode());
     for (auto l : request.getTargetClass()->getLessons()) {
@@ -284,8 +236,7 @@ bool Dataset::canAdd(const Request& request, string& message) const {
     return true;
 }
 
-void Dataset::addUcClass(const Request& request, int student_code) {
-    UcClassRef uc_class = request.getTargetClass();
+void Dataset::addUcClass(UcClassRef uc_class, int student_code) {
     StudentRef student_ref = searchStudentByCode(student_code), old_ref = student_ref;
     Student new_student = *student_ref;
     student_ref++;
@@ -296,8 +247,7 @@ void Dataset::addUcClass(const Request& request, int student_code) {
     uc_class->incrementNumberOfStudents();
 }
 
-void Dataset::removeUcClass(const Request& request, int student_code) {
-    auto uc_class = request.getCurrentClass();
+void Dataset::removeUcClass(UcClassRef uc_class, int student_code) {
     StudentRef student_ref = searchStudentByCode(student_code), old_ref = student_ref;
     Student new_student = *student_ref;
     student_ref++;

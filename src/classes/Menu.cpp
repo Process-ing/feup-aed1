@@ -168,7 +168,7 @@ void Menu::requestMenu() {
             student_code = student->getStudentCode();
             uc_code = chooseUcMenu();
             target_class = chooseClassMenu(uc_code);
-            cout << "\nRequest submitted sucessfully. ";
+            cout << "\nRequest submitted successfully. ";
             waitForEnter();
             break;
         case Option::REMOVE:
@@ -178,7 +178,7 @@ void Menu::requestMenu() {
                 return;
             student_code = student->getStudentCode();
             current_class = chooseStudentClassMenu(*student);
-            cout << "\nRequest submitted sucessfully. ";
+            cout << "\nRequest submitted successfully. ";
             waitForEnter();
             break;
         case Option::SWITCH:
@@ -190,40 +190,38 @@ void Menu::requestMenu() {
             current_class = chooseStudentClassMenu(*student);
             uc_code = chooseUcMenu();
             target_class = chooseClassMenu(uc_code);
-            cout << "\nRequest submitted sucessfully. ";
+            cout << "\nRequest submitted successfully. ";
             waitForEnter();
             break;
         case Option::UNDO:
             if (dataset_.getArchivedRequests().empty()) {
-                cout << "\nNo requests to undo." << endl;
+                cout << "\nNo requests to undo. ";
                 waitForEnter();
-            }
-            else {
+            } else {
+                cout << "The last saved change will be immediately undone. ";
+                if (!confirm())
+                    return;
                 Request last = dataset_.getArchivedRequests().top();
                 dataset_.getArchivedRequests().pop();
                 student_code = last.getStudentCode();
-                if (last.getType() == Request::ADD) {
-                    type = Request::REMOVE;
-                    current_class = last.getTargetClass();
-                }
-                else if (last.getType() == Request::REMOVE) {
-                    type = Request::ADD;
-                    target_class = last.getCurrentClass();
-                }
-                else if (last.getType() == Request::SWITCH) {
-                    type = Request::SWITCH;
-                    current_class = last.getTargetClass();
-                    target_class = last.getCurrentClass();
+                switch (last.getType()) {
+                    case Request::ADD:
+                        dataset_.removeUcClass(last.getTargetClass(), last.getStudentCode());
+                        break;
+                    case Request::REMOVE:
+                        dataset_.addUcClass(last.getCurrentClass(), last.getStudentCode());
+                        break;
+                    case Request::SWITCH:
+                        dataset_.removeUcClass(last.getTargetClass(), last.getStudentCode());
+                        dataset_.addUcClass(last.getCurrentClass(), last.getStudentCode());
                 }
                 cout << "\nUndo was successful." << endl;
             }
-            break;
+            return;
         case Option::GO_BACK:
             return;
     }
     dataset_.getPendentRequests().emplace(type, student_code, current_class, target_class);
-    if (option != Option::UNDO)
-        dataset_.getArchivedRequests().emplace(type, student_code, current_class, target_class);
 }
 
 void Menu::saveMenu() {
@@ -255,7 +253,8 @@ void Menu::performRequest(const Request& request) {
                     if (!confirm())
                         return;
                 }
-                dataset_.addUcClass(request, student_code);
+                dataset_.addUcClass(request.getTargetClass(), student_code);
+                dataset_.getArchivedRequests().push(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to enter class "
                      << request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << ": "
@@ -271,7 +270,8 @@ void Menu::performRequest(const Request& request) {
                     if (!confirm())
                         return;
                 }
-                dataset_.removeUcClass(request, student_code);
+                dataset_.removeUcClass(request.getCurrentClass(), student_code);
+                dataset_.getArchivedRequests().push(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to leave class "
                      << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << ": "
@@ -290,8 +290,9 @@ void Menu::performRequest(const Request& request) {
                         return;
                 }
 
-                dataset_.removeUcClass(request, student_code);
-                dataset_.addUcClass(request, student_code);
+                dataset_.removeUcClass(request.getCurrentClass(), student_code);
+                dataset_.addUcClass(request.getTargetClass(), student_code);
+                dataset_.getArchivedRequests().push(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to go from class "
                      << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode()
