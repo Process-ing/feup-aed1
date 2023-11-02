@@ -68,3 +68,7 @@ bool UcClass::operator==(const UcClass &other) const {
 bool UcClass::operator!=(const UcClass &other) const {
     return uc_code_ != other.uc_code_ || class_code_ != other.class_code_;
 }
+
+int UcClass::getAcademicYear() const {
+    return class_code_[0] - '0';
+}

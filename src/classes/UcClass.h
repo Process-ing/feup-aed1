@@ -1,3 +1,8 @@
+/**
+ * @file UcClass.h
+ * Header file for class UcClass.
+ */
+
 #ifndef UCCLASS_H
 #define UCCLASS_H
 
@@ -72,6 +77,8 @@ public:
      */
     bool operator==(const UcClass& other) const;
     bool operator!=(const UcClass& other) const;
+
+    int getAcademicYear() const;
 private:
     std::string uc_code_;
     std::string class_code_;

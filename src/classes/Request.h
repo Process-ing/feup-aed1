@@ -1,3 +1,8 @@
+/**
+ * @file Request.h
+ * Header file for class Request.
+ */
+
 #ifndef FEUP_AED1_REQUEST_H
 #define FEUP_AED1_REQUEST_H
 

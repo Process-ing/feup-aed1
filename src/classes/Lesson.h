@@ -1,10 +1,13 @@
 /**
+ * @file Lesson.h
  * Header file for class Lesson.
  */
 
 #ifndef FEUP_AED1_LESSON_H
 #define FEUP_AED1_LESSON_H
 
+
+#include <string>
 
 class Lesson {
 public:
@@ -30,6 +33,8 @@ public:
 
     double getStart() const;
     double getEnd() const;
+    std::string getFormattedStart() const;
+    std::string getFormattedEnd() const;
     Type getType() const;
     Weekday getWeekday() const;
     /**
@@ -45,6 +50,8 @@ public:
      */
     bool overlaps(const Lesson &lesson) const;
     bool isCompatibleWith(const Lesson& lesson) const;
+
+    static std::string formatTime(double time);
 private:
     double start_;
     double end_;

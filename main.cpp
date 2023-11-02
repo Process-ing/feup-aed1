@@ -1,9 +1,10 @@
-#include "Dataset.h"
-
 /**
+ * @file main.cpp
  * Main file of project.
  */
 
+
+#include "Dataset.h"
 #include <exception>
 #include <iostream>
 
@@ -12,10 +13,9 @@
 using namespace std;
 
 int main() {
-    Dataset dataset;
-    Menu menu(dataset);
-
     try {
+        Dataset dataset;
+        Menu menu(dataset);
         menu.launch();
         return 0;
     } catch (const exception& e) {

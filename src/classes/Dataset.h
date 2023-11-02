@@ -1,3 +1,8 @@
+/**
+ * @file Dataset.h
+ * Header file for class Dataset.
+ */
+
 #ifndef FEUP_AED1_DATASET_H
 #define FEUP_AED1_DATASET_H
 
@@ -109,6 +114,20 @@ class Dataset {
 
     void saveChanges();
 
+
+    /**
+     * @brief Returns the lessons of the student, based on its classes and sorted by start time.
+     * Complexity: O(m*n), where m is the number of classes of the student and n is the max number of lessons
+     * in each class
+     * @param student
+     * @return Student's lessons
+     */
+    std::vector<Lesson> getStudentLessons(const Student& student) const;
+
+    std::vector<UcClass> getUcClassesByClassCode(const std::string& class_code) const;
+    std::vector<std::string> getUcCodes() const;
+    std::vector<UcClass> getClassesByUcCode(const std::string& uc_code) const;
+    std::vector<std::string> getClassCodesByYear(int year) const;
 
 private:
     std::vector<UcClass> uc_classes_;

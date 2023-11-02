@@ -1,4 +1,5 @@
 /**
+ * @file Student.h
  * Header file for class Student.
  */
 
@@ -10,13 +11,15 @@
 #include <string>
 #include <set>
 
+typedef std::vector<UcClass>::iterator UcClassRef;
+
 class Student {
-private:
+  private:
     int student_code_;
     std::string student_name_;
     std::list<UcClassRef> uc_classes_;
     int max_class_capacity_ = 0;
-public:
+  public:
     /**
      * @brief Constructor of the class.
      * @author João Mendes
