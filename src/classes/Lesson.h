@@ -1,4 +1,5 @@
 /**
+ * @file Lesson.h
  * Header file for class Lesson.
  */
 

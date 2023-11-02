@@ -1,9 +1,10 @@
-#include "Dataset.h"
-
 /**
+ * @file main.cpp
  * Main file of project.
  */
 
+
+#include "Dataset.h"
 #include <exception>
 #include <iostream>
 
