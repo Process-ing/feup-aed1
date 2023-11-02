@@ -48,6 +48,8 @@ public:
      * @param lesson Lesson to compare
      */
     bool overlaps(const Lesson &lesson) const;
+
+    static std::string formatTime(double time);
 private:
     double start_;
     double end_;

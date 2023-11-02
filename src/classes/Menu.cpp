@@ -4,6 +4,7 @@
 #include <sstream>
 #include <limits>
 #include <unordered_map>
+#include <cmath>
 
 #include "Menu.h"
 
@@ -103,10 +104,12 @@ Menu::SortOption Menu::sortMenu() {
 
 void Menu::chooseScheduleMenu() const {
     const static string CHOOSE_SCHEDULE_FILEPATH = "src/menus/choose_schedule_menu.txt";
-    const static int NUM_OPTIONS = 2;
+    const static int NUM_OPTIONS = 4;
     enum Option {
-        STUDENT = 1,
-        CLASS = 2,
+        STUDENT_DIAGRAM = 1,
+        STUDENT_VISUAL = 2,
+        CLASS_DIAGRAM = 3,
+        CLASS_VISUAL = 4,
     };
 
     clearScreen();
@@ -120,11 +123,17 @@ void Menu::chooseScheduleMenu() const {
     cout << chooseScheduleFile.rdbuf();
 
     switch (receiveOption(NUM_OPTIONS)) {
-        case Option::STUDENT:
+        case Option::STUDENT_DIAGRAM:
             displayDiagramSchedule(*dataset_.searchStudentByCode(receiveStudentCode()));
             break;
-        case Option::CLASS:
+        case Option::STUDENT_VISUAL:
+            displayVisualSchedule(*dataset_.searchStudentByCode(receiveStudentCode()));
+            break;
+        case Option::CLASS_DIAGRAM:
             displayDiagramSchedule(chooseClassWithYearMenu());
+            break;
+        case Option::CLASS_VISUAL:
+            displayVisualSchedule(chooseClassWithYearMenu());
     }
 }
 
@@ -141,7 +150,7 @@ void Menu::displayDiagramSchedule(const string& class_code) const {
     cout << '\n'
          << " ┌─ Class diagram schedule ──────────────────────────────────────────────────────────────┐\n"
          << " │                                                                                       │\n"
-         << " │  " << left << setw(85) << "Class: " + class_code << "|\n"
+         << " │  " << left << setw(85) << "Class: " + class_code << "│\n"
          << " │                                                                                       │\n";
     for (const UcClass& uc_class: dataset_.getUcClassesByClassCode(class_code)) {
         cout << " │  " << left << setw(85) << uc_class.getUcCode() + ":" << "│\n";
@@ -155,8 +164,7 @@ void Menu::displayDiagramSchedule(const string& class_code) const {
         }
         cout << " │                                                                                       │\n";
     }
-
-        cout << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    cout << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
     waitForEnter();
 }
 
@@ -190,12 +198,160 @@ void Menu::displayDiagramSchedule(const Student &student) const {
         }
         cout << " │                                                                                       │\n";
     }
+    cout << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    waitForEnter();
+}
 
-        cout << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+string centerFill(const string &str, int width) {
+    double space = max((width - (double)str.size()) / 2.0, 0.0);
+    return string(ceil(space), ' ') + str + string(floor(space), ' ');
+}
+
+void Menu::displayVisualSchedule(const string &class_code) const {
+    static const unordered_map<Lesson::Type, string> TYPE_TO_STR = {
+            {Lesson::T, "T"}, {Lesson::TP, "TP"}, {Lesson::PL, "PL"}
+    };
+    static const int NUM_COLUMNS = 6;
+    static const int NUM_ROWS = 24;
+
+    vector<vector<string>> schedule_cells(NUM_ROWS, vector<string>(NUM_COLUMNS, ""));
+    for (const UcClass& uc_class: dataset_.getUcClassesByClassCode(class_code)) {
+        for (const Lesson& lesson: uc_class.getLessons()) {
+            int column = lesson.getWeekday();
+            int start = (int)(lesson.getStart() * 2.0) - 16, end = (int)(lesson.getEnd() * 2.0) - 16;
+            for (int row = start; row < end; row++) {
+                schedule_cells[row][column] = uc_class.getUcCode() + " (" + TYPE_TO_STR.at(lesson.getType()) + ')';
+            }
+        }
+    }
+
+    clearScreen();
+    cout << '\n'
+         << " ┌─ Class visual schedule ───────────────────────────────────────────────────────────────────────────────────────────────┐\n"
+         << " │                                                                                                                       │\n"
+         << " │  Class: " << left << setw(110) << class_code << "│\n"
+         << " │                                                                                                                       │\n"
+         << " │ ┌─────────────┬────────────────┬────────────────┬────────────────┬────────────────┬────────────────┬────────────────┐ │\n"
+         << " │ │     Hour    │     Monday     │     Tuesday    │    Wednesday   │    Thursday    │     Friday     │    Saturday    │ │\n"
+         << " │ ├─────────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤ │\n";
+    double time = 8.0;
+    for (int i = 0; i < NUM_ROWS; i++) {
+        cout << " │ │" << centerFill(Lesson::formatTime(time) + '-' + Lesson::formatTime(time + 0.5), 13) << "│";
+        for (int j = 0; j < NUM_COLUMNS; j++) {
+            if (i == 0 || schedule_cells[i][j].empty() || schedule_cells[i - 1][j] != schedule_cells[i][j])
+                cout << centerFill(schedule_cells[i][j], 16) << "│";
+            else
+                cout << "                │";
+        }
+        cout << " │\n";
+
+        if (i < NUM_ROWS - 1) {
+            cout << " │ ├─────────────";
+            if (schedule_cells[i][0].empty() || schedule_cells[i][0] != schedule_cells[i + 1][0])
+                cout << "┼";
+            else
+                cout << "┤";
+            for (int j = 0; j < NUM_COLUMNS; j++) {
+                if (schedule_cells[i][j].empty() || schedule_cells[i][j] != schedule_cells[i + 1][j]) {
+                    cout << "────────────────";
+                    if (j < NUM_COLUMNS - 1
+                        && (schedule_cells[i][j + 1].empty() || schedule_cells[i][j + 1] != schedule_cells[i + 1][j + 1]))
+                        cout << "┼";
+                    else
+                        cout << "┤";
+                } else {
+                    cout << "                ";
+                    if (j < NUM_COLUMNS - 1
+                        && (schedule_cells[i][j + 1].empty() || schedule_cells[i][j + 1] != schedule_cells[i + 1][j + 1]))
+                        cout << "├";
+                    else
+                        cout << "│";
+                }
+            }
+            cout << " │\n";
+        } else {
+            cout << " │ └─────────────┴────────────────┴────────────────┴────────────────┴────────────────┴────────────────┴────────────────┘ │\n"
+                 << " └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+        }
+        time += 0.5;
+    }
+    waitForEnter();
+}
+
+void Menu::displayVisualSchedule(const Student &student) const {
+    static const unordered_map<Lesson::Type, string> TYPE_TO_STR = {
+            {Lesson::T, "T"}, {Lesson::TP, "TP"}, {Lesson::PL, "PL"}
+    };
+    static const int NUM_COLUMNS = 6;
+    static const int NUM_ROWS = 24;
+
+    vector<vector<string>> schedule_cells(NUM_ROWS, vector<string>(NUM_COLUMNS, ""));
+    for (UcClassRef uc_class: student.getUcClasses()) {
+        for (const Lesson& lesson: uc_class->getLessons()) {
+            int column = lesson.getWeekday();
+            int start = (int)(lesson.getStart() * 2.0) - 16, end = (int)(lesson.getEnd() * 2.0) - 16;
+            for (int row = start; row < end; row++) {
+                schedule_cells[row][column] = uc_class->getUcCode() + " (" + TYPE_TO_STR.at(lesson.getType()) + ')';
+            }
+        }
+    }
+
+    clearScreen();
+    cout << '\n'
+         << " ┌─ Student visual schedule ─────────────────────────────────────────────────────────────────────────────────────────────┐\n"
+         << " │                                                                                                                       │\n"
+         << " │  Student code: " << left << setw(103) << student.getStudentCode() << "│\n"
+         << " │  Student name: " << setw(103) << student.getStudentName() << "│\n"
+         << " │                                                                                                                       │\n"
+         << " │ ┌─────────────┬────────────────┬────────────────┬────────────────┬────────────────┬────────────────┬────────────────┐ │\n"
+         << " │ │     Hour    │     Monday     │     Tuesday    │    Wednesday   │    Thursday    │     Friday     │    Saturday    │ │\n"
+         << " │ ├─────────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤ │\n";
+    double time = 8.0;
+    for (int i = 0; i < NUM_ROWS; i++) {
+        cout << " │ │" << centerFill(Lesson::formatTime(time) + '-' + Lesson::formatTime(time + 0.5), 13) << "│";
+        for (int j = 0; j < NUM_COLUMNS; j++) {
+            if (i == 0 || schedule_cells[i][j].empty() || schedule_cells[i - 1][j] != schedule_cells[i][j])
+                cout << centerFill(schedule_cells[i][j], 16) << "│";
+            else
+                cout << "                │";
+        }
+        cout << " │\n";
+
+        if (i < NUM_ROWS - 1) {
+            cout << " │ ├─────────────";
+            if (schedule_cells[i][0].empty() || schedule_cells[i][0] != schedule_cells[i + 1][0])
+                cout << "┼";
+            else
+                cout << "┤";
+            for (int j = 0; j < NUM_COLUMNS; j++) {
+                if (schedule_cells[i][j].empty() || schedule_cells[i][j] != schedule_cells[i + 1][j]) {
+                    cout << "────────────────";
+                    if (j < NUM_COLUMNS - 1
+                        && (schedule_cells[i][j + 1].empty() || schedule_cells[i][j + 1] != schedule_cells[i + 1][j + 1]))
+                        cout << "┼";
+                    else
+                        cout << "┤";
+                } else {
+                    cout << "                ";
+                    if (j < NUM_COLUMNS - 1
+                        && (schedule_cells[i][j + 1].empty() || schedule_cells[i][j + 1] != schedule_cells[i + 1][j + 1]))
+                        cout << "├";
+                    else
+                        cout << "│";
+                }
+            }
+            cout << " │\n";
+        } else {
+            cout << " │ └─────────────┴────────────────┴────────────────┴────────────────┴────────────────┴────────────────┴────────────────┘ │\n"
+                 << " └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+        }
+        time += 0.5;
+    }
     waitForEnter();
 }
 
 string Menu::chooseUcMenu() const {
+    clearScreen();
     cout << '\n'
          << " ┌─ Choose an UC ────────────────────────────────────────────────────────────────────────┐\n"
          << " │                                                                                       │\n"
@@ -212,6 +368,7 @@ string Menu::chooseUcMenu() const {
 }
 
 UcClass Menu::chooseClassMenu(const string& uc_code) const {
+    clearScreen();
     cout << '\n'
          << " ┌─ Choose a class ──────────────────────────────────────────────────────────────────────┐\n"
          << " │                                                                                       │\n"
@@ -231,16 +388,24 @@ string Menu::chooseClassWithYearMenu() const {
     int year;
     vector<string> class_codes;
     cout << "Please insert the year: ";
-    while (!(cin >> year) || (class_codes = dataset_.getClassCodesByYear(year)).empty()) {
-        if (cin.bad()) {
+    while (true) {
+        if (!(cin >> year)) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Invalid year. Please insert a year: ";
-        } else {
-            cout << "No classes for this year were found. Please insert another year: ";
+            continue;
         }
+
+        class_codes = dataset_.getClassCodesByYear(year);
+        if (class_codes.empty()) {
+            cout << "No classes for this year were found. Please insert another year: ";
+            continue;
+        }
+
+        break;
     }
 
+    clearScreen();
     cout << '\n'
          << " ┌─ Choose a class ──────────────────────────────────────────────────────────────────────┐\n"
          << " │                                                                                       │\n"

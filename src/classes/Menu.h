@@ -36,6 +36,8 @@ class Menu {
     void chooseScheduleMenu() const;
     void displayDiagramSchedule(const std::string& class_code) const;
     void displayDiagramSchedule(const Student& student) const;
+    void displayVisualSchedule(const std::string& class_code) const;
+    void displayVisualSchedule(const Student& student) const;
     std::string chooseUcMenu() const;
     UcClass chooseClassMenu(const std::string& uc_code) const;
     std::string chooseClassWithYearMenu() const;
