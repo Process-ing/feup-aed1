@@ -1,4 +1,5 @@
 /**
+ * @file Student.h
  * Header file for class Student.
  */
 
@@ -10,15 +11,13 @@
 #include <string>
 #include <set>
 
-typedef std::vector<UcClass>::const_iterator UcClassRef;
-
 class Student {
-private:
+  private:
     int student_code_;
     std::string student_name_;
-    std::list<UcClassRef> uc_classes_;
-    int max_class_capacity_ = 0;
-public:
+    std::list<UcClassConstRef> uc_classes_;
+
+  public:
     /**
      * @brief Constructor of the class.
      * @author João Mendes
@@ -30,11 +29,17 @@ public:
 
     int getStudentCode() const;
     std::string getStudentName() const;
-    std::list<UcClassRef> &getUcClasses();
-    const std::list<UcClassRef> &getUcClasses() const;
-    bool hasClass(const UcClass& uc_class) const;
-    int getAcademicYear() const;
+    std::list<UcClassConstRef> &getUcClasses();
+    const std::list<UcClassConstRef> &getUcClasses() const;
+    bool isInClass(const UcClass& uc_class) const;
+    bool isInUc(const std::string& uc_code) const;
+    std::vector<Lesson> getLessons() const;
+    std::vector<Lesson> getLessonsIgnoring(const UcClass& class_to_ignore) const;
+    bool lessonsOverlapsWith(const Lesson& lesson) const;
+    bool lessonsOverlapsWith(const Lesson& lesson, const UcClass& class_to_ignore) const;
     bool operator<(const Student &student) const;
 };
+
+typedef std::set<Student>::iterator StudentRef;
 
 #endif //FEUP_AED1_STUDENT_H

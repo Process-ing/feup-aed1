@@ -1,3 +1,8 @@
+/**
+ * @file Menu.h
+ * Header file for class Menu
+ */
+
 #ifndef FEUP_AED1_MENU_H
 #define FEUP_AED1_MENU_H
 
@@ -9,7 +14,7 @@
  * @brief The Menu class handles the user interface and interactions with the dataset.
  */
 class Menu {
-public:
+  public:
     /**
      * @brief Constructs a Menu instance.
      * @param dataset The dataset used by the menu.
@@ -31,7 +36,7 @@ public:
      * @brief Launches the menu, starting with the welcome screen.
      * @author Bruno Oliviera
      */
-    void launch() const;
+    void launch();
 
     /**
      * @brief Searches for a student by their code.
@@ -121,6 +126,9 @@ private:
      * @author Bruno Oliveira
      */
     void searchMenu() const;
+    void requestMenu();
+    void saveMenu();
+    void performRequest(const Request& request);
 
     /**
      * @brief Displays a menu for sorting options and returns the chosen option.
@@ -128,7 +136,18 @@ private:
      * @author Diogo Vieira and Bruno Oliveira
      */
     static SortOption sortMenu();
+    void chooseScheduleMenu() const;
+    void displayDiagramSchedule(const std::string& class_code) const;
+    void displayDiagramSchedule(const Student& student) const;
+    void displayVisualSchedule(const std::string& class_code) const;
+    void displayVisualSchedule(const Student& student) const;
+    std::string chooseUcMenu() const;
+    UcClassConstRef chooseClassMenu(const std::string& uc_code) const;
+    UcClassRef chooseClassMenu(const std::string& uc_code);
+    std::string chooseClassWithYearMenu() const;
+    UcClassRef chooseStudentClassMenu(const Student& student);
 
+    StudentRef receiveStudentCode() const;
     /**
      * @brief Receives an option from the user, validating it against a maximum value.
      * @param max The maximum valid option.
@@ -136,12 +155,14 @@ private:
      * @author Bruno Oliveira
      */
     static int receiveOption(int max);
+    static bool confirm();
 
     /**
      * @brief Waits for the user to press Enter before continuing.
      * @author Bruno Oliveira
      */
     static void waitForEnter();
+    static void clearScreen();
 };
 
 #endif //FEUP_AED1_MENU_H

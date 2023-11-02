@@ -1,9 +1,15 @@
+/**
+ * @file UcClass.h
+ * Header file for class UcClass.
+ */
+
 #ifndef UCCLASS_H
 #define UCCLASS_H
 
 #include "Lesson.h"
 #include <vector>
 #include <string>
+
 /**
  * @class UcClass
  * This class represents a university class within a course.
@@ -20,7 +26,7 @@ public:
      * Default constructor for UcClass
      * @author Diogo Vieira
      */
-    UcClass();
+     UcClass();
 
     /**
     * Parameterized constructor for UcClass
@@ -44,6 +50,8 @@ public:
     const std::vector<Lesson>& getLessons() const;
     int getNumberOfStudents() const;
     void setNumberOfStudents(int new_number_of_students);
+    int incrementNumberOfStudents();
+    int decrementNumberOfStudents();
     /**
       * @brief Add a Lesson to this UcClass.
       * Adds a Lesson to the collection of lessons associated with this UcClass.
@@ -68,6 +76,7 @@ public:
      * @author Diogo Vieira
      */
     bool operator==(const UcClass& other) const;
+    bool operator!=(const UcClass& other) const;
 
     int getAcademicYear() const;
 private:
@@ -76,5 +85,8 @@ private:
     std::vector<Lesson> lessons_;
     int number_of_students_;
 };
+
+typedef std::vector<UcClass>::iterator UcClassRef;
+typedef std::vector<UcClass>::const_iterator UcClassConstRef;
 
 #endif

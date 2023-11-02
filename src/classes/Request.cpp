@@ -1,33 +1,28 @@
 #include "Request.h"
+#include <utility>
 
-Request::Request(Request::Type type, Student& student, UcClass& target_class) {
+using namespace std;
+
+Request::Request(Request::Type type, int student_code, UcClassRef current_class, UcClassRef target_class) {
+    student_code_ = student_code;
     type_ = type;
-    student_ = &student;
-    target_class_ = &target_class;
-}
-
-void Request::perform(Dataset &dataset) {
-    switch (type_) {
-        case ADD:
-            //TODO
-            break;
-        case REMOVE:
-            //TODO
-            break;
-        case SWITCH:
-            //TODO
-            break;
-    }
+    current_class_ = current_class;
+    target_class_ = target_class;
 }
 
 Request::Type Request::getType() const {
     return type_;
 }
 
-const Student& Request::getStudent() const {
-    return *student_;
+int Request::getStudentCode() const {
+    return student_code_;
 }
 
-const UcClass& Request::getTargetClass() const {
-    return *target_class_;
+UcClassRef Request::getCurrentClass() const {
+    return current_class_;
 }
+
+UcClassRef Request::getTargetClass() const {
+    return target_class_;
+}
+

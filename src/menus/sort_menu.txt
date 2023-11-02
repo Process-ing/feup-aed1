@@ -1,11 +1,13 @@
 
-┌─ Sort results by ─────────────────────────────────────────────────────────────────────┐
-│                                                                                       │
-│  Options:                                                                             │
-│    [1] Alphabetical order                                                             │
-│    [2] Reverse alphabetical order                                                     │
-│    [3] Ascending code                                                                 │
-│    [4] Descending code                                                                │
-│                                                                                       │
-└───────────────────────────────────────────────────────────────────────────────────────┘
+ ┌─ Sort results by ─────────────────────────────────────────────────────────────────────┐
+ │                                                                                       │
+ │  Options:                                                                             │
+ │    [1] Alphabetical order                                                             │
+ │    [2] Reverse alphabetical order                                                     │
+ │    [3] Ascending code                                                                 │
+ │    [4] Descending code                                                                │
+ │    [5] Ascending number of UCs                                                        │
+ │    [6] Descending number of UCs                                                       │
+ │                                                                                       │
+ └───────────────────────────────────────────────────────────────────────────────────────┘
 
