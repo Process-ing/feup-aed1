@@ -4,6 +4,8 @@
 #include <limits>
 
 #include "Menu.h"
+#include "Request.h"
+#include "Student.h"
 
 using namespace std;
 
@@ -33,6 +35,12 @@ void Menu::launch() const {
         switch (receiveOption(NUM_OPTIONS)) {
             case Option::SEARCH:
                 searchMenu();
+                break;
+            case Option::REQUEST:
+                requestMenu();
+                break;
+            case Option::SAVE:
+                saveMenu();
                 break;
             case Option::EXIT:
                 cout << "Exiting the app. ";
@@ -78,6 +86,117 @@ void Menu::searchMenu() const {
     }
 }
 
+void Menu::requestMenu() const {
+    const static string REQUEST_MENU_FILEPATH = "src/menus/request_menu.txt";
+    const static int NUM_OPTIONS = 5;
+    enum Option {
+        ADD = 1,
+        REMOVE = 2,
+        SWITCH = 3,
+        UNDO = 4,
+        GO_BACK = 5,
+    };
+
+    ifstream request_menu_file(REQUEST_MENU_FILEPATH);
+    if (request_menu_file.fail()) {
+        ostringstream error_msg;
+        error_msg << "cannot read menu file \"" << REQUEST_MENU_FILEPATH << "\".";
+        throw ios_base::failure(error_msg.str());
+    }
+
+    cout << request_menu_file.rdbuf();
+
+    string uc_code, class_code;
+    UcClassRef current_class = dataset_.findUcClass("", "");
+    UcClassRef target_class = dataset_.findUcClass("", "");
+    Request::Type type;
+    int option = receiveOption(NUM_OPTIONS);
+    int student_code;
+    switch (option) {
+        case Option::ADD:
+            type = Request::ADD;
+            student_code = receiveStudentCode();
+            if (student_code == -1)
+                return;
+            cout << "Please enter the UC code of the UcClass you want to add: ";
+            cin >> uc_code;
+            cout << "Please enter the class code of the UcClass you want to add: ";
+            cin >> class_code;
+            target_class = dataset_.findUcClass(uc_code, class_code);
+            cout << "\nRequest submitted sucessfully. ";
+            waitForEnter();
+            break;
+        case Option::REMOVE:
+            type = Request::REMOVE;
+            student_code = receiveStudentCode();
+            if (student_code == -1)
+                return;
+            cout << "Please enter the UC code of the UcClass you want to remove: ";
+            cin >> uc_code;
+            cout << "Please enter the class code of the UcClass you want to remove: ";
+            cin >> class_code;
+            current_class = dataset_.findUcClass(uc_code, class_code);
+            cout << "\nRequest submitted sucessfully. ";
+            waitForEnter();
+            break;
+        case Option::SWITCH:
+            type = Request::SWITCH;
+            student_code = receiveStudentCode();
+            if (student_code == -1)
+                return;
+            cout << "Please enter the UC code of the UcClass you want to go from: ";
+            cin >> uc_code;
+            cout << "Please enter the class code of the UcClass you want to go from: ";
+            cin >> class_code;
+            current_class = dataset_.findUcClass(uc_code, class_code);
+            cout << "Please enter the UC code of the UcClass you want to go to: ";
+            cin >> uc_code;
+            cout << "Please enter the class code of the UcClass you want to go to: ";
+            cin >> class_code;
+            target_class = dataset_.findUcClass(uc_code, class_code);
+            cout << "\nRequest submitted sucessfully. ";
+            waitForEnter();
+            break;
+        case Option::UNDO:
+            if (dataset_.getArchivedRequests().empty()) {
+                cout << "\nNo requests to undo." << endl;
+                waitForEnter();
+            }
+            else {
+                Request last = dataset_.getArchivedRequests().top();
+                dataset_.getArchivedRequests().pop();
+                student_code = last.getStudentCode();
+                if (last.getType() == Request::ADD) {
+                    type = Request::REMOVE;
+                    current_class = last.getTargetClass();
+                }
+                else if (last.getType() == Request::REMOVE) {
+                    type = Request::ADD;
+                    target_class = last.getCurrentClass();
+                }
+                else if (last.getType() == Request::SWITCH) {
+                    type = Request::SWITCH;
+                    current_class = last.getTargetClass();
+                    target_class = last.getCurrentClass();
+                }
+                cout << "\nUndo was successful." << endl;
+            }
+            break;
+        case Option::GO_BACK:
+            return;
+    }
+    dataset_.getPendentRequests().emplace(type, student_code, current_class, target_class);
+    if (option != Option::UNDO)
+        dataset_.getArchivedRequests().emplace(type, student_code, current_class, target_class);
+}
+
+void Menu::saveMenu() const {
+    if (!dataset_.getPendentRequests().empty())
+        cout << "\nSaved the following changes:\n";
+    dataset_.saveChanges();
+    waitForEnter();
+}
+
 Menu::SortOption Menu::sortMenu() {
     const static string SORT_MENU_FILEPATH = "src/menus/sort_menu.txt";
     const static int NUM_OPTIONS = 4;
@@ -91,6 +210,32 @@ Menu::SortOption Menu::sortMenu() {
 
     cout << sort_menu_file.rdbuf();
     return (SortOption) receiveOption(NUM_OPTIONS);
+}
+
+//UcClass Menu::chooseUcClassMenu() const {
+//    clearScreen();
+//    cout << "┌─ Request ─────────────────────────────────────────────────────────────────────────────┐\n"
+//            "│                                                                                       │\n";
+//
+//}
+
+int Menu::receiveStudentCode() const {
+    int code;
+    cout << "Please enter the student's code (press q to quit): ";
+    while (!(cin >> code)) {
+        cin.clear();
+        if (getchar() == 'q')
+            return -1;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid student code. Please enter another student code (press q to quit): ";
+    }
+
+    if (dataset_.searchStudentByCode(code) == dataset_.getStudents().end()) {
+        cout << "Student could not be found. ";
+        waitForEnter();
+        return -1;
+    }
+    return code;
 }
 
 int Menu::receiveOption(int max) {
@@ -108,4 +253,8 @@ void Menu::waitForEnter() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "Press ENTER to continue...";
     getchar();
+}
+
+void Menu::clearScreen() {
+    system("clear || cls");
 }

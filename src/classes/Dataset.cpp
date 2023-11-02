@@ -14,7 +14,8 @@
 
 using namespace std;
 
-Dataset::Dataset(){
+Dataset::Dataset() {
+    max_class_capacity_ = 0;
     readUcs();
     readClasses();
     readStudents();
@@ -106,23 +107,14 @@ vector<Student> Dataset::searchStudentsByAdmissionYear(int year) const {
     return students_by_year;
 }
 
-vector<Student> Dataset::searchStudentsByCode(int student_code) const {
-    vector<Student> the_student;
-    for (const Student& student : students_) {
-        if (student.getStudentCode() == student_code) {
-            the_student.push_back(student);
-        }
-    }
-    if (the_student.empty()) {
-        cout << "No student with code " << student_code << " was found." << endl;
-    }
-    return the_student;
+StudentRef Dataset::searchStudentByCode(int student_code) const {
+    return students_.find(Student(student_code, ""));
 }
 
 vector<Student> Dataset::searchStudentsByUcClass(const UcClass& uc_class) const {
     vector<Student> students_in_class;
     for (const Student& student : students_) {
-        if (student.hasClass(uc_class)) {
+        if (student.isInClass(uc_class)) {
             students_in_class.push_back(student);
         }
     }
@@ -198,6 +190,232 @@ void Dataset::readStudents() {
             students_.insert(current_student);
             current_student = Student(student_code, student_name);
         }
-        current_student.getUcClasses().emplace_back(findUcClass(uc_code,class_code));
+        auto uc_class = findUcClass(uc_code,class_code);
+        current_student.getUcClasses().emplace_back(uc_class);
+        max_class_capacity_ = max(max_class_capacity_, uc_class->incrementNumberOfStudents());
     }
+}
+
+queue<Request>& Dataset::getPendentRequests() {
+    return pendent_requests_;
+}
+
+const queue<Request>& Dataset::getPendentRequests() const {
+    return pendent_requests_;
+}
+
+stack<Request>& Dataset::getArchivedRequests() {
+    return archived_requests_;
+}
+
+const stack<Request>& Dataset::getArchivedRequests() const {
+    return archived_requests_;
+}
+
+void Dataset::perform(const Request& request) {
+    int student_code = request.getStudentCode();
+    Student student = *searchStudentByCode(student_code);
+    string message;
+    switch (request.getType()) {
+        case Request::ADD:
+            if (canAdd(request, message)) {
+                cout << "Student named " << student.getStudentName() << " entered class " <<
+                request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << endl;
+
+                addUcClass(request, student_code);
+            } else {
+                cout << "Student named " << student.getStudentName() << " failed to enter class "
+                     << request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << ": "
+                     << message << endl;
+            }
+            break;
+        case Request::REMOVE:
+            if (canRemove(request, message)) {
+                cout << "Student named " << student.getStudentName() << " left class " <<
+                     request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << endl;
+
+                removeUcClass(request, student_code);
+            } else {
+                cout << "Student named " << student.getStudentName() << " failed to leave class "
+                     << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << ": "
+                     << message << endl;
+            }
+            break;
+        case Request::SWITCH:
+            if (canSwitch(request, message)) {
+                cout << "Student named " << student.getStudentName() << " went from class " <<
+                     request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() <<
+                     " to UcClass " << request.getTargetClass()->getUcCode() << '-'
+                     << request.getTargetClass()->getClassCode() << endl;
+
+                removeUcClass(request, student_code);
+                addUcClass(request, student_code);
+            } else {
+                cout << "Student named " << student.getStudentName() << " failed to go from class "
+                     << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode()
+                     << " to class " << request.getTargetClass()->getUcCode() << '-'
+                     << request.getTargetClass()->getClassCode() << ": " << message << endl;
+            }
+            break;
+    }
+}
+
+bool Dataset::canAdd(const Request& request, string& message) const {
+    const Student& student = *searchStudentByCode(request.getStudentCode());
+    for (auto l : request.getTargetClass()->getLessons()) {
+        if (student.lessonsOverlapsWith(l)) {
+            message = "Has lessons that are not compatible with class "
+                + request.getTargetClass()->getClassCode() + " lessons";
+            return false;
+        }
+    }
+    if (student.getUcClasses().size() >= 7) {
+        message = "Already registered in 7 UCs";
+    }
+    if (student.isInUc(request.getTargetClass()->getUcCode())) {
+        message = "Already in UC " + request.getTargetClass()->getUcCode();
+        return false;
+    }
+    if (isClassFull(*request.getTargetClass())) {
+        message = "Class " + request.getTargetClass()->getClassCode() + " is full";
+        return false;
+    }
+    return true;
+}
+
+void Dataset::addUcClass(const Request& request, int student_code) {
+    UcClassRef uc_class = request.getTargetClass();
+    StudentRef student_ref = searchStudentByCode(student_code), old_ref = student_ref;
+    Student new_student = *student_ref;
+    student_ref++;
+
+    new_student.getUcClasses().insert(new_student.getUcClasses().end(), uc_class);
+    students_.erase(old_ref);
+    students_.insert(student_ref, new_student);
+    uc_class->incrementNumberOfStudents();
+}
+
+void Dataset::removeUcClass(const Request& request, int student_code) {
+    auto uc_class = request.getCurrentClass();
+    StudentRef student_ref = searchStudentByCode(student_code), old_ref = student_ref;
+    Student new_student = *student_ref;
+    student_ref++;
+
+    new_student.getUcClasses().remove(uc_class);
+    students_.erase(old_ref);
+    students_.insert(student_ref, new_student);
+    uc_class->decrementNumberOfStudents();
+}
+
+bool Dataset::canRemove(const Request& request, string& message) const {
+    const Student& student = *searchStudentByCode(request.getStudentCode());
+    if (student.getUcClasses().size() <= 1) {
+        message = "Student must have at least one class";
+        return false;
+    }
+    if (!student.isInUc(request.getCurrentClass()->getUcCode())) {
+        message = "Student not in UC " + request.getCurrentClass()->getUcCode();
+        return false;
+    }
+    if (removeBalanceDisturbance(*request.getCurrentClass())) {
+        message = "Class balance of UC " + request.getCurrentClass()->getUcCode() + " would be broken";
+        return false;
+    }
+    return true;
+}
+
+bool Dataset::canSwitch(const Request& request, string& message) const {
+    const Student& student = *searchStudentByCode(request.getStudentCode());
+    if (student.isInClass(*request.getTargetClass())) {
+        message = "Student already in class " + request.getTargetClass()->getUcCode()
+                + '-' + request.getTargetClass()->getClassCode();
+        return false;
+    }
+    for (auto l : request.getTargetClass()->getLessons()) {
+        if (student.lessonsOverlapsWith(l, *request.getCurrentClass())) {
+            message = "Has lessons that are not compatible with class "
+                      + request.getTargetClass()->getClassCode() + " lessons";
+            return false;
+        }
+    }
+    if (request.getCurrentClass()->getUcCode() != request.getTargetClass()->getUcCode()
+        && student.isInUc(request.getTargetClass()->getUcCode())) {
+        message = "Already in UC " + request.getTargetClass()->getUcCode();
+        return false;
+    }
+    if (isClassFull(*request.getTargetClass())) {
+        message = "Class " + request.getTargetClass()->getClassCode() + " is full";
+        return false;
+    }
+    string problem_uc_code;
+    if (switchBalanceDisturbance(*request.getCurrentClass(), *request.getTargetClass(), problem_uc_code)) {
+        message = "Class balance of UC " + problem_uc_code + " would be broken";
+        return false;
+    }
+    return true;
+}
+
+bool Dataset::addBalanceDisturbance(const UcClass& uc_class) const {
+    int nmin = uc_class.getNumberOfStudents() + 1, nmax = uc_class.getNumberOfStudents() + 1;
+    for (const UcClass& other: getClassesInUc(uc_class.getUcCode())) {
+        nmin = min(nmin, other.getNumberOfStudents());
+        nmax = max(nmax, other.getNumberOfStudents());
+    }
+    return nmax - nmin > 4;
+}
+
+bool Dataset::removeBalanceDisturbance(const UcClass& uc_class) const {
+    int nmin = uc_class.getNumberOfStudents() - 1, nmax = uc_class.getNumberOfStudents() - 1;
+    for (const UcClass& other: getClassesInUc(uc_class.getUcCode())) {
+        nmin = min(nmin, other.getNumberOfStudents());
+        nmax = max(nmax, other.getNumberOfStudents());
+    }
+    return nmax - nmin > 4;
+}
+
+bool Dataset::switchBalanceDisturbance(const UcClass& from, const UcClass& dest, string& problem_uc_code) const {
+    int nmin = dest.getNumberOfStudents() + 1, nmax = dest.getNumberOfStudents() + 1;
+    for (const UcClass& other: getClassesInUc(dest.getUcCode())) {
+        nmin = min(nmin, other == from ? other.getNumberOfStudents() - 1 : other.getNumberOfStudents());
+        nmax = max(nmax, other == from ? other.getNumberOfStudents() - 1 : other.getNumberOfStudents());
+    }
+    if (nmax - nmin > 4) {
+        problem_uc_code = dest.getUcCode();
+        return true;
+    }
+
+    nmin = from.getNumberOfStudents() - 1, nmax = from.getNumberOfStudents() - 1;
+    for (const UcClass& other: getClassesInUc(from.getUcCode())) {
+        nmin = min(nmin, other == dest ? other.getNumberOfStudents() + 1 : other.getNumberOfStudents());
+        nmax = max(nmax, other == dest ? other.getNumberOfStudents() + 1 : other.getNumberOfStudents());
+    }
+    if (nmax - nmin > 4) {
+        problem_uc_code = from.getUcCode();
+        return true;
+    }
+    return false;
+}
+
+bool Dataset::isClassFull(const UcClass& uc_class) const {
+    return uc_class.getNumberOfStudents() == max_class_capacity_;
+}
+
+
+void Dataset::saveChanges() {
+    if (pendent_requests_.empty())
+        cout << "\nNo requests were made\n" << endl;
+    while (!pendent_requests_.empty()) {
+        perform(pendent_requests_.front());
+        pendent_requests_.pop();
+    }
+}
+
+vector<UcClass> Dataset::getClassesInUc(const std::string &uc_code) const {
+    vector<UcClass> res;
+    auto it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
+    while (it != uc_classes_.end() && it->getUcCode() == uc_code) {
+        res.push_back(*it);
+        it++;
+    }
+    return res;
 }

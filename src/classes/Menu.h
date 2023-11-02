@@ -32,10 +32,15 @@ class Menu {
     Dataset &dataset_;
 
     void searchMenu() const;
+    void requestMenu() const;
+    void saveMenu() const;
     static SortOption sortMenu();
+//    UcClass chooseUcClassMenu() const;
 
+    int receiveStudentCode() const;
     static int receiveOption(int max);
     static void waitForEnter();
+    static void clearScreen();
 };
 
 

@@ -4,7 +4,6 @@
 #include <string>
 
 #include "UcClass.h"
-#include "Dataset.h"
 #include "Student.h"
 
 /**
@@ -24,24 +23,18 @@ class Request {
         SWITCH
     };
 
-    Request(Type type, Student& student, UcClass& current_class, UcClass& target_class);
-
-    void perform(Dataset& dataset);
+    Request(Type type, int student_code, UcClassRef current_class, UcClassRef target_class);
 
     Type getType() const;
-    const Student& getStudent() const;
-    const UcClass& getTargetClass() const;
-    bool alreadyInUc(UcClass* what_class);
-    // bool classFull();
-    bool addBalanceDisturbance(Dataset &dataset);
-    bool removeBalanceDisturbance(Dataset &dataset);
-    bool overlaping();
+    int getStudentCode() const;
+    UcClassRef getCurrentClass() const;
+    UcClassRef getTargetClass() const;
 
   private:
     Type type_;
-    Student* student_;
-    UcClass* current_class_;
-    UcClass* target_class_;
+    int student_code_;
+    UcClassRef current_class_;
+    UcClassRef target_class_;
 };
 
 

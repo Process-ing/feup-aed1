@@ -3,8 +3,11 @@
 
 #include <set>
 #include <map>
+#include <queue>
+#include <stack>
 #include "Student.h"
 #include "UcClass.h"
+#include "Request.h"
 
 /**
  * @brief Class that stores all dataset information and performs all actions on it.
@@ -15,6 +18,10 @@ class Dataset {
 
     const std::set<Student>& getStudents() const;
     const std::vector<UcClass>& getUcClasses() const;
+    std::queue<Request>& getPendentRequests();
+    const std::queue<Request>& getPendentRequests() const;
+    std::stack<Request>& getArchivedRequests();
+    const std::stack<Request>& getArchivedRequests() const;
 
     void readFiles();
 
@@ -67,7 +74,7 @@ class Dataset {
      * @param student_code The student code to search for.
      * @return A vector containing the found student(s) with the given code, which may be empty if no student matches the code.
      */
-    std::vector<Student> searchStudentsByCode(int student_code) const;
+    StudentRef searchStudentByCode(int student_code) const;
 
     /**
      * Searches for students enrolled in a specific UC by its unique code.
@@ -87,9 +94,28 @@ class Dataset {
 
     void readStudents();
 
+    void perform(const Request& request);
+    bool canAdd(const Request& request, std::string& message) const;
+    bool canRemove(const Request& request, std::string& message) const;
+    bool canSwitch(const Request& request, std::string& message) const;
+    void addUcClass(const Request& request, int student_code);
+    void removeUcClass(const Request& request, int student_code);
+    bool addBalanceDisturbance(const UcClass& uc_class) const;
+    bool removeBalanceDisturbance(const UcClass& uc_class) const;
+    bool switchBalanceDisturbance(const UcClass& from, const UcClass& dest, std::string& problem_uc_code) const;
+
+    bool isClassFull(const UcClass& uc_class) const;
+    std::vector<UcClass> getClassesInUc(const std::string& uc_code) const;
+
+    void saveChanges();
+
+
 private:
     std::vector<UcClass> uc_classes_;
     std::set<Student> students_;
+    std::queue<Request> pendent_requests_;
+    std::stack<Request> archived_requests_;
+    int max_class_capacity_;
 };
 
 #endif //FEUP_AED1_DATASET_H

@@ -44,6 +44,7 @@ public:
      * @param lesson Lesson to compare
      */
     bool overlaps(const Lesson &lesson) const;
+    bool isCompatibleWith(const Lesson& lesson) const;
 private:
     double start_;
     double end_;

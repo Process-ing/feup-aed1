@@ -37,6 +37,14 @@ void UcClass::setNumberOfStudents(int new_number_of_students) {
     number_of_students_ = new_number_of_students;
 }
 
+int UcClass::incrementNumberOfStudents() {
+    return ++number_of_students_;
+}
+
+int UcClass::decrementNumberOfStudents() {
+    return --number_of_students_;
+}
+
 vector<Lesson>& UcClass::getLessons() {
     return lessons_;
 }
@@ -55,4 +63,8 @@ bool UcClass::operator<(const UcClass& other) const {
 
 bool UcClass::operator==(const UcClass &other) const {
     return uc_code_ == other.uc_code_ && class_code_ == other.class_code_;
+}
+
+bool UcClass::operator!=(const UcClass &other) const {
+    return uc_code_ != other.uc_code_ || class_code_ != other.class_code_;
 }
