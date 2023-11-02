@@ -8,6 +8,7 @@
 
 #include <set>
 #include <map>
+#include <map>
 #include <queue>
 #include <stack>
 #include "Student.h"
@@ -18,7 +19,11 @@
  * @brief Class that stores all dataset information and performs all actions on it.
  */
 class Dataset {
-  public:
+public:
+    /**
+     * @brief Constructs a Dataset instance.
+     * @author Diogo Vieira
+     */
     Dataset();
 
     std::set<Student>& getStudents();
@@ -29,19 +34,22 @@ class Dataset {
     const std::queue<Request>& getPendentRequests() const;
     std::stack<Request>& getArchivedRequests();
     const std::stack<Request>& getArchivedRequests() const;
-
+    int getMaxClassCapacity() const;
+    std::vector<std::string> getAllClassCodes() const;
     /**
-     * Reads Uc data from a file and populates the dataset.
+     * @brief Reads Uc data from a file and populates the dataset.
+     * @author Diogo Vieira
      */
     void readUcs();
 
     /**
-     * Reads UcClasses data from a file and populates the dataset.
+     * @brief Reads UcClasses data from a file and populates the dataset.
+     * @author Diogo Vieira
      */
     void readClasses();
 
     /**
-     * Find a specific UcClass based on its unique code and class code.
+     * @brief Find a specific UcClass based on its unique code and class code.
      *
      * @param uc_code The unique code of the UcClass to find.
      * @param code_of_class The class code of the UcClass to find.
@@ -51,7 +59,7 @@ class Dataset {
     UcClassConstRef findUcClass(const std::string& uc_code, const std::string& code_of_class) const;
 
     /**
-     * Searches for students in the dataset based on their admission year.
+     * @brief Searches for students in the dataset based on their admission year.
      *
      * @param year The year to search for in student registration codes.
      * @return A vector of students whose admission year matches the specified year.
@@ -59,7 +67,7 @@ class Dataset {
     std::vector<Student> searchStudentsByAdmissionYear(int year) const;
 
     /**
-     * Searches for students in the dataset who are enrolled in a specific UC class.
+     * @brief Searches for students in the dataset who are enrolled in a specific UC class.
      *
      * @param uc_class The UC class to search for.
      * @return A vector of students who are enrolled in the specified UC class.
@@ -67,7 +75,7 @@ class Dataset {
     std::vector<Student> searchStudentsByUcClass(const UcClass& uc_class) const;
 
     /**
-     * Searches for students in the dataset who are enrolled in at least 'n' UCs.
+     * @brief Searches for students in the dataset who are enrolled in at least 'n' UCs.
      *
      * @param n The minimum number of UCs a student must be enrolled in to be included in the result.
      * @return A vector of students who are enrolled in at least 'n' UCs.
@@ -75,7 +83,7 @@ class Dataset {
     std::vector<Student> searchStudentsInAtLeastNUCs(int n) const;
 
     /**
-     * Searches for a student in the dataset by their student code.
+     * @brief Searches for a student in the dataset by their student code.
      *
      * @param student_code The student code to search for.
      * @return A vector containing the found student(s) with the given code, which may be empty if no student matches the code.
@@ -83,7 +91,7 @@ class Dataset {
     StudentRef searchStudentByCode(int student_code) const;
 
     /**
-     * Searches for students enrolled in a specific UC by its unique code.
+     * @brief Searches for students enrolled in a specific UC by its unique code.
      *
      * @param uc_code The unique code of the UC to search for.
      * @return A vector containing the students enrolled in the specified UC, which may be empty if no students are found.
@@ -91,7 +99,7 @@ class Dataset {
     std::vector<Student> searchStudentsInUC(const std::string& uc_code) const;
 
     /**
-     * Searches for students enrolled in a specific class by its class code.
+     * @brief Searches for students enrolled in a specific class by its class code.
      *
      * @param classCode The code of the class to search for.
      * @return A vector containing the students enrolled in the specified class, which may be empty if no students are found.
@@ -115,9 +123,6 @@ class Dataset {
     std::vector<UcClassConstRef> getClassesInUc(const std::string& uc_code) const;
     std::vector<UcClassRef> getClassesInUc(const std::string& uc_code);
 
-    void saveChanges();
-
-
     /**
      * @brief Returns the lessons of the student, based on its classes and sorted by start time.
      * Complexity: O(m*n), where m is the number of classes of the student and n is the max number of lessons
@@ -126,6 +131,14 @@ class Dataset {
      * @return Student's lessons
      */
     std::vector<Lesson> getStudentLessons(const Student& student) const;
+
+    /**
+     * @brief Searches for students in the dataset based on their academic year.
+     * @param year The academic year to search for in student registration codes.
+     * @return A vector of students whose academic year matches the specified year.
+     * @author Diogo Vieira and Bruno Oliveira
+     */
+    std::vector<Student> searchStudentsByAcademicYear(int year) const;
 
     std::vector<UcClassConstRef> getUcClassesByClassCode(const std::string& class_code) const;
     std::vector<UcClassRef> getUcClassesByClassCode(const std::string& class_code);

@@ -15,7 +15,7 @@
  * @brief Class abstraction for requests for addition, removal and exchange of students' classes.
  */
 class Request {
-  public:
+public:
 
     /**
      * @brief Type of request
@@ -35,7 +35,7 @@ class Request {
     UcClassRef getCurrentClass() const;
     UcClassRef getTargetClass() const;
 
-  private:
+private:
     Type type_;
     int student_code_;
     UcClassRef current_class_;

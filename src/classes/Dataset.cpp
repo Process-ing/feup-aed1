@@ -37,6 +37,10 @@ const vector<UcClass>& Dataset::getUcClasses() const {
     return uc_classes_;
 }
 
+int Dataset::getMaxClassCapacity() const {
+    return max_class_capacity_;
+}
+
 void Dataset::readUcs() {
     static const string CLASSES_PER_UC_FILEPATH = "dataset/classes_per_uc.csv";
     ifstream classes_per_uc_file(CLASSES_PER_UC_FILEPATH);
@@ -104,9 +108,13 @@ UcClassConstRef Dataset::findUcClass(const string& uc_code, const string& class_
 }
 
 vector<Student> Dataset::searchStudentsByAdmissionYear(int year) const {
-    auto first = students_.equal_range(Student(year * 10000, "")).first,
-        last = students_.equal_range(Student((year + 1) * 10000, "")).first;
-    return { first, last };
+    vector<Student> res;
+    auto it = students_.lower_bound(Student(year * 100000, ""));
+    while (it != students_.end() && it->getAdmissionYear() == year) {
+        res.push_back(*it);
+        it++;
+    }
+    return res;
 }
 
 StudentRef Dataset::searchStudentByCode(int student_code) const {
@@ -187,9 +195,6 @@ void Dataset::readStudents() {
         current_student.getUcClasses().emplace_back(uc_class);
         max_class_capacity_ = max(max_class_capacity_, uc_class->incrementNumberOfStudents());
     }
-
-    for (const Student& student: students_)
-        cout << student.getStudentName() << endl;
 }
 
 queue<Request>& Dataset::getPendentRequests() {
@@ -475,6 +480,13 @@ std::vector<UcClassRef> Dataset::getClassesInUc(const std::string &uc_code) {
     return res;
 }
 
+vector<string> Dataset::getAllClassCodes() const {
+    set<string> res;
+    for (const UcClass& uc_class: uc_classes_)
+        res.insert(uc_class.getClassCode());
+    return { res.begin(), res.end() };
+}
+
 vector<string> Dataset::getClassCodesByYear(int year) const {
     set<string> res;
     for (const UcClass& uc_class: uc_classes_) {
@@ -483,12 +495,22 @@ vector<string> Dataset::getClassCodesByYear(int year) const {
     }
     return { res.begin(), res.end() };
 }
+
 vector<UcClassConstRef> Dataset::getClassesInUc(const std::string &uc_code) const {
     vector<UcClassConstRef> res;
     UcClassConstRef it = lower_bound(uc_classes_.begin(), uc_classes_.end(), UcClass(uc_code, ""));
     while (it != uc_classes_.end() && it->getUcCode() == uc_code) {
         res.push_back(it);
         it++;
+    }
+    return res;
+}
+
+vector<Student> Dataset::searchStudentsByAcademicYear(int year) const {
+    vector<Student> res;
+    for (const Student& student: students_) {
+        if (student.getAcademicYear() == year)
+            res.push_back(student);
     }
     return res;
 }

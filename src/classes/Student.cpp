@@ -24,6 +24,21 @@ bool Student::isInClass(const UcClass &uc_class) const {
     return false;
 }
 
+bool Student::operator<(const Student &student) const{
+    return this->student_code_ < student.student_code_;
+}
+
+int Student::getAdmissionYear() const {
+    return student_code_ / 100000;
+}
+
+int Student::getAcademicYear() const {
+    int res = -1;
+    for (UcClassConstRef uc_class: uc_classes_)
+        res = max(res, uc_class->getAcademicYear());
+    return res;
+}
+
 bool Student::isInUc(const std::string &uc_code) const {
     for (UcClassConstRef student_class: uc_classes_) {
         if (student_class->getUcCode() == uc_code)
@@ -86,8 +101,4 @@ bool Student::lessonsOverlapsWith(const Lesson &lesson, const UcClass& class_to_
         it++;
     }
     return false;
-}
-
-bool Student::operator<(const Student &student) const {
-    return this->student_code_ < student.student_code_;
 }

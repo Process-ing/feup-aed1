@@ -33,6 +33,7 @@ bool Lesson::operator<(const Lesson &lesson) const {
 
 bool Lesson::overlaps(const Lesson &lesson) const {
     return weekday_ == lesson.weekday_ && start_ < lesson.end_ && lesson.start_ < this->end_;
+    return weekday_ == lesson.weekday_ && start_ < lesson.end_ && lesson.start_ < this->end_;
 }
 
 bool Lesson::isCompatibleWith(const Lesson &lesson) const {

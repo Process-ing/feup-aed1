@@ -35,6 +35,8 @@ class Student {
     bool isInUc(const std::string& uc_code) const;
     std::vector<Lesson> getLessons() const;
     std::vector<Lesson> getLessonsIgnoring(const UcClass& class_to_ignore) const;
+    int getAdmissionYear() const;
+    int getAcademicYear() const;
     bool lessonsOverlapsWith(const Lesson& lesson) const;
     bool lessonsOverlapsWith(const Lesson& lesson, const UcClass& class_to_ignore) const;
     bool operator<(const Student &student) const;
