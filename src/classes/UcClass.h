@@ -1,3 +1,8 @@
+/**
+ * @file UcClass.h
+ * Header file for class UcClass.
+ */
+
 #ifndef UCCLASS_H
 #define UCCLASS_H
 

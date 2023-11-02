@@ -1,3 +1,8 @@
+/**
+ * @file Menu.h
+ * Header file for class Menu
+ */
+
 #ifndef FEUP_AED1_MENU_H
 #define FEUP_AED1_MENU_H
 

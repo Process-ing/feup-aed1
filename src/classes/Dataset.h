@@ -1,3 +1,8 @@
+/**
+ * @file Dataset.h
+ * Header file for class Dataset.
+ */
+
 #ifndef FEUP_AED1_DATASET_H
 #define FEUP_AED1_DATASET_H
 
