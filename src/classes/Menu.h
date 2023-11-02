@@ -51,7 +51,6 @@ class Menu {
 
     int receiveStudentCode() const;
     static int receiveOption(int max);
-    int receiveStudentCode() const;
     static void waitForEnter();
     static void clearScreen();
 };

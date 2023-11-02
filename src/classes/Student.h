@@ -11,8 +11,6 @@
 #include <string>
 #include <set>
 
-typedef std::vector<UcClass>::iterator UcClassRef;
-
 class Student {
   private:
     int student_code_;
