@@ -37,6 +37,10 @@ const vector<UcClass>& Dataset::getUcClasses() const {
     return uc_classes_;
 }
 
+int Dataset::getMaxClassCapacity() const {
+    return max_class_capacity_;
+}
+
 void Dataset::readUcs() {
     static const string CLASSES_PER_UC_FILEPATH = "dataset/classes_per_uc.csv";
     ifstream classes_per_uc_file(CLASSES_PER_UC_FILEPATH);

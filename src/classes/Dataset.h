@@ -34,6 +34,7 @@ public:
     const std::queue<Request>& getPendentRequests() const;
     std::stack<Request>& getArchivedRequests();
     const std::stack<Request>& getArchivedRequests() const;
+    int getMaxClassCapacity() const;
     std::vector<std::string> getAllClassCodes() const;
     /**
      * @brief Reads Uc data from a file and populates the dataset.

@@ -102,6 +102,8 @@ class Menu {
      * @author Diogo Vieira
      */
     void displayStudent(const Student& student) const;
+    void displayStudents() const;
+    void displayClassesInUc() const;
 
 private:
     /**
@@ -135,6 +137,7 @@ private:
     UcClassRef chooseClassMenu(const std::string& uc_code);
     std::string chooseClassWithYearMenu() const;
     UcClassRef chooseStudentClassMenu(const Student& student);
+    void displayClassOccupation(const std::string& uc_code) const;
 
     StudentRef receiveStudentCode() const;
     /**

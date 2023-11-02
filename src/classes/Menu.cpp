@@ -63,19 +63,21 @@ void Menu::launch() {
 
 void Menu::searchMenu() const {
     const static string SEARCH_MENU_FILEPATH = "src/menus/search_menu.txt";
-    const static int NUM_OPTIONS = 11;
+    const static int NUM_OPTIONS = 12;
     enum Option {
         ALL_STUDENTS = 1,
         ALL_UCS = 2,
         ALL_CLASSES = 3,
-        STUDENT_CODE = 4,
-        STUDENTS_UC = 5,
-        STUDENTS_CLASS = 6,
-        STUDENTS_UC_CLASS = 7,
-        STUDENTS_ACADEMIC_YEAR = 8,
-        STUDENTS_ADMISSION_YEAR = 9,
-        STUDENTS_N_UCS = 10,
-        GO_BACK = 11,
+        CLASS_OCCUPATION = 4,
+        CLASSES_IN_UC = 5,
+        STUDENT_CODE = 6,
+        STUDENTS_UC = 7,
+        STUDENTS_CLASS = 8,
+        STUDENTS_UC_CLASS = 9,
+        STUDENTS_ACADEMIC_YEAR = 10,
+        STUDENTS_ADMISSION_YEAR = 11,
+        STUDENTS_N_UCS = 12,
+        GO_BACK = 13,
     };
 
     clearScreen();
@@ -89,50 +91,42 @@ void Menu::searchMenu() const {
     cout << search_menu_file.rdbuf();
 
     switch (receiveOption(NUM_OPTIONS)) {
-        case Option::ALL_STUDENTS:{
-            set<Student> all_students_set = dataset_.getStudents();
-            vector<Student> all_students(all_students_set.begin(), all_students_set.end());
-            sortMenu(all_students);
-            displayStudentsNameAndCode(all_students);
+        case Option::ALL_STUDENTS:
+            displayStudents();
             break;
-        }
-        case Option::ALL_UCS: {
+        case Option::ALL_UCS:
             displayUcs();
             break;
-        }
-
-        case Option::ALL_CLASSES: {
+        case Option::ALL_CLASSES:
             displayClasses();
             break;
-        }
-        case Option::STUDENT_CODE: {
+        case Option::CLASS_OCCUPATION:
+            displayClassOccupation(chooseUcMenu());
+            break;
+        case Option::CLASSES_IN_UC:
+            displayClassesInUc();
+            break;
+        case Option::STUDENT_CODE:
             searchStudentByCode();
             break;
-        }
-        case Option::STUDENTS_UC: {
+        case Option::STUDENTS_UC:
             searchStudentByUc();
             break;
-        }
-        case Option::STUDENTS_CLASS: {
+        case Option::STUDENTS_CLASS:
             searchStudentsByClass();
             break;
-        }
-        case Option::STUDENTS_UC_CLASS:{
+        case Option::STUDENTS_UC_CLASS:
             searchStudentsInUcClass();
             break;
-        }
-        case Option::STUDENTS_ADMISSION_YEAR: {
+        case Option::STUDENTS_ADMISSION_YEAR:
             searchStudentsByAdmissionYear();
             break;
-        }
-        case Option::STUDENTS_ACADEMIC_YEAR:{
+        case Option::STUDENTS_ACADEMIC_YEAR:
             searchStudentsByAcademicYear();
             break;
-        }
-        case Option::STUDENTS_N_UCS: {
+        case Option::STUDENTS_N_UCS:
             searchStudentInAtLeastNUcs();
             break;
-        }
         case Option::GO_BACK:
             return;
     }
@@ -827,6 +821,34 @@ void Menu::searchStudentsInUcClass() const {
     displayStudentsNameAndCode(students_in_uc_class);
 }
 
+void Menu::displayStudents() const {
+    set<Student> students_set = dataset_.getStudents();
+    vector<Student> students_vec(students_set.begin(), students_set.end());
+    sortMenu(students_vec);
+    displayStudentsNameAndCode(students_vec);
+}
+
+void Menu::displayClassesInUc() const {
+    string uc_code = chooseUcMenu();
+    vector<UcClassRef> classes = dataset_.getClassesByUcCode(uc_code);
+    if (classes.empty()) {
+        cout << "No classes found in this UC. ";
+        waitForEnter();
+        return;
+    }
+
+    cout << "\n"
+            " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
+            " │                                                                                       │\n";
+
+    for (auto uc_class: classes)
+        cout << " │  " << left << setw(85) << uc_class->getClassCode() <<  "│\n";
+
+    cout << " │                                                                                       │\n"
+            " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    waitForEnter();
+}
+
 void Menu::displayStudent(const Student& student) const {
     clearScreen();
     cout << "\n"
@@ -914,6 +936,28 @@ void Menu::displayStudentsNameAndCode(const vector<Student>& students) const {
             cout << "Invalid option. Please choose another option: ";
         }
     }
+}
+
+void Menu::displayClassOccupation(const std::string &uc_code) const {
+    vector<UcClassRef> uc_classes = dataset_.getClassesByUcCode(uc_code);
+    if (uc_classes.empty()) {
+        cout << "No classes found. ";
+        waitForEnter();
+        return;
+    }
+
+    cout << "\n"
+            " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
+            " │                                                                                       │\n";
+
+    for (auto uc_class: uc_classes)
+        cout << " │  " << left << setw(85) << uc_class->getClassCode()
+             + ", Occupation: " + to_string(uc_class->getNumberOfStudents())
+             + ", Capacity: " + to_string(dataset_.getMaxClassCapacity()) <<  "│\n";
+
+    cout << " │                                                                                       │\n"
+            " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
+    waitForEnter();
 }
 
 void Menu::displayUcs() const {
