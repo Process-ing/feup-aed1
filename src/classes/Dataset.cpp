@@ -211,10 +211,10 @@ void Dataset::readArchive() {
     string type, student_code, curr_uc_code, curr_class_code, target_uc_code, target_class_code, line;
     getline(archive_file, line);
     while (getline(archive_file, type, ',')) {
-        getline(archive_file, student_code);
-        getline(archive_file, curr_uc_code);
-        getline(archive_file, curr_class_code);
-        getline(archive_file, target_uc_code);
+        getline(archive_file, student_code, ',');
+        getline(archive_file, curr_uc_code, ',');
+        getline(archive_file, curr_class_code, ',');
+        getline(archive_file, target_uc_code, ',');
         getline(archive_file, target_class_code);
         UcClassRef curr_uc_class = findUcClass(curr_uc_code, curr_class_code);
         UcClassRef target_uc_class = findUcClass(target_uc_code, target_class_code);
@@ -386,10 +386,11 @@ void Dataset::saveChangesToFile() {
         {Request::ADD, "ADD"}, {Request::REMOVE, "REMOVE"}, {Request::SWITCH, "SWITCH"},
     };
     const static string ARCHIVE_FILEPATH = "dataset/archive.csv";
+    stack<Request> archive_copy(archived_requests_);
     stack<Request> inverted_archive;
-    while (!archived_requests_.empty()) {
-        inverted_archive.push(archived_requests_.top());
-        archived_requests_.pop();
+    while (!archive_copy.empty()) {
+        inverted_archive.push(archive_copy.top());
+        archive_copy.pop();
     }
     ofstream archive_file(ARCHIVE_FILEPATH);
 
