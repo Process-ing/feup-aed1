@@ -11,6 +11,10 @@
 #include <string>
 #include <set>
 
+
+/**
+ * Represents a student and its information.
+ */
 class Student {
   private:
     int student_code_;
