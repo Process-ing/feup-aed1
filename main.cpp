@@ -8,14 +8,14 @@
 #include <exception>
 #include <iostream>
 
-#include "Menu.h"
+#include "Window.h"
 
 using namespace std;
 
 int main() {
     try {
         Dataset dataset;
-        Menu menu(dataset);
+        Window menu(dataset);
         menu.launch();
         return 0;
     } catch (const exception& e) {

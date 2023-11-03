@@ -7,16 +7,16 @@
 #include <cmath>
 #include <algorithm>
 
-#include "Menu.h"
+#include "Window.h"
 #include "Request.h"
 #include "Student.h"
 #include "utils.h"
 
 using namespace std;
 
-Menu::Menu(Dataset& dataset) : dataset_(dataset) {}
+Window::Window(Dataset& dataset) : dataset_(dataset) {}
 
-void Menu::launch() {
+void Window::launch() {
     const static string WELCOME_SCREEN_FILEPATH = "src/menus/welcome_screen.txt";
     const static int NUM_OPTIONS = 5;
     enum Option {
@@ -60,7 +60,7 @@ void Menu::launch() {
     }
 }
 
-void Menu::searchMenu() const {
+void Window::searchMenu() const {
     const static string SEARCH_MENU_FILEPATH = "src/menus/search_menu.txt";
     const static int NUM_OPTIONS = 13;
     enum Option {
@@ -131,7 +131,7 @@ void Menu::searchMenu() const {
     }
 }
 
-void Menu::requestMenu() {
+void Window::requestMenu() {
     const static string REQUEST_MENU_FILEPATH = "src/menus/request_menu.txt";
     const static int NUM_OPTIONS = 5;
     enum Option {
@@ -198,11 +198,10 @@ void Menu::requestMenu() {
                 cout << "\nNo requests to undo. ";
                 waitForEnter();
             } else {
-                cout << "The last saved change will be immediately and irreversibly undone. ";
+                cout << "The last saved change will be immediately undone. ";
                 if (!confirm())
                     return;
-                Request last = dataset_.getArchivedRequests().top();
-                dataset_.getArchivedRequests().pop();
+                Request last = dataset_.popArchivedRequest();
                 student_code = last.getStudentCode();
                 switch (last.getType()) {
                     case Request::ADD:
@@ -215,7 +214,6 @@ void Menu::requestMenu() {
                         dataset_.removeUcClass(last.getTargetClass(), last.getStudentCode());
                         dataset_.addUcClass(last.getCurrentClass(), last.getStudentCode());
                 }
-                dataset_.saveChangesToFile();
                 cout << "\nUndo was successful. " << endl;
                 waitForEnter();
             }
@@ -223,21 +221,25 @@ void Menu::requestMenu() {
         case Option::GO_BACK:
             return;
     }
-    dataset_.getPendentRequests().emplace(type, student_code, current_class, target_class);
+    dataset_.pushPendentRequest(Request(type, student_code, current_class, target_class));
 }
 
-void Menu::saveMenu() {
-    queue<Request>& pendent_requests = dataset_.getPendentRequests();
-    while (!pendent_requests.empty()) {
-        performRequest(pendent_requests.front());
-        pendent_requests.pop();
+void Window::saveMenu() {
+    if (!dataset_.hasUnsavedChanges()) {
+        cout << "No changes were made to the system. ";
+        waitForEnter();
+        return;
     }
+
+    const queue<Request>& pendent_requests = dataset_.getPendentRequests();
+    while (!pendent_requests.empty())
+        performRequest(dataset_.popPendentRequest());
     dataset_.saveChangesToFile();
-    cout << "\nAll successful changes were saved. ";
+    cout << "All successful changes were saved. ";
     waitForEnter();
 }
 
-void Menu::performRequest(const Request& request) {
+void Window::performRequest(const Request& request) {
     int student_code = request.getStudentCode();
     Student student = *dataset_.searchStudentByCode(student_code);
     string message, problem_uc_code;
@@ -252,7 +254,7 @@ void Menu::performRequest(const Request& request) {
                         return;
                 }
                 dataset_.addUcClass(request.getTargetClass(), student_code);
-                dataset_.getArchivedRequests().push(request);
+                dataset_.pushArchivedRequest(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to enter class "
                      << request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << ": "
@@ -269,7 +271,7 @@ void Menu::performRequest(const Request& request) {
                         return;
                 }
                 dataset_.removeUcClass(request.getCurrentClass(), student_code);
-                dataset_.getArchivedRequests().push(request);
+                dataset_.pushArchivedRequest(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to leave class "
                      << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << ": "
@@ -290,7 +292,7 @@ void Menu::performRequest(const Request& request) {
 
                 dataset_.removeUcClass(request.getCurrentClass(), student_code);
                 dataset_.addUcClass(request.getTargetClass(), student_code);
-                dataset_.getArchivedRequests().push(request);
+                dataset_.pushArchivedRequest(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to go from class "
                      << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode()
@@ -301,7 +303,7 @@ void Menu::performRequest(const Request& request) {
     }
 }
 
-void Menu::sortMenu(std::vector<Student>& students) {
+void Window::sortMenu(std::vector<Student>& students) {
     const static string SORT_MENU_FILEPATH = "src/menus/sort_menu.txt";
     const static int NUM_OPTIONS = 6;
     enum Option {
@@ -345,7 +347,7 @@ void Menu::sortMenu(std::vector<Student>& students) {
     }
 }
 
-StudentRef Menu::receiveStudentCode() const {
+StudentRef Window::receiveStudentCode() const {
     int code;
     cout << "Please enter the student's code (press q to quit): ";
     while (!(cin >> code)) {
@@ -364,7 +366,7 @@ StudentRef Menu::receiveStudentCode() const {
     return studentRef;
 }
 
-void Menu::chooseScheduleMenu() const {
+void Window::chooseScheduleMenu() const {
     const static string CHOOSE_SCHEDULE_FILEPATH = "src/menus/choose_schedule_menu.txt";
     const static int NUM_OPTIONS = 5;
     enum Option {
@@ -410,7 +412,7 @@ void Menu::chooseScheduleMenu() const {
     }
 }
 
-void Menu::displayDiagramSchedule(const string& class_code) const {
+void Window::displayDiagramSchedule(const string& class_code) const {
     static const unordered_map<Lesson::Weekday, string> WEEKDAY_TO_STR = {
             {Lesson::MONDAY, "Monday"}, {Lesson::TUESDAY, "Tuesday"}, {Lesson::WEDNESDAY, "Wednesday"},
             {Lesson::THURSDAY, "Thursday"}, {Lesson::FRIDAY, "Friday"}, {Lesson::SATURDAY, "Saturday"}
@@ -441,7 +443,7 @@ void Menu::displayDiagramSchedule(const string& class_code) const {
     waitForEnter();
 }
 
-void Menu::displayDiagramSchedule(const Student &student) const {
+void Window::displayDiagramSchedule(const Student &student) const {
     static const unordered_map<Lesson::Weekday, string> WEEKDAY_TO_STR = {
             {Lesson::MONDAY, "Monday"}, {Lesson::TUESDAY, "Tuesday"}, {Lesson::WEDNESDAY, "Wednesday"},
             {Lesson::THURSDAY, "Thursday"}, {Lesson::FRIDAY, "Friday"}, {Lesson::SATURDAY, "Saturday"}
@@ -480,7 +482,7 @@ string centerFill(const string &str, int width) {
     return string(ceil(space), ' ') + str + string(floor(space), ' ');
 }
 
-void Menu::displayVisualSchedule(const string &class_code) const {
+void Window::displayVisualSchedule(const string &class_code) const {
     static const unordered_map<Lesson::Type, string> TYPE_TO_STR = {
             {Lesson::T, "T"}, {Lesson::TP, "TP"}, {Lesson::PL, "PL"}
     };
@@ -551,7 +553,7 @@ void Menu::displayVisualSchedule(const string &class_code) const {
     waitForEnter();
 }
 
-void Menu::displayVisualSchedule(const Student &student) const {
+void Window::displayVisualSchedule(const Student &student) const {
     static const unordered_map<Lesson::Type, string> TYPE_TO_STR = {
             {Lesson::T, "T"}, {Lesson::TP, "TP"}, {Lesson::PL, "PL"}
     };
@@ -623,7 +625,7 @@ void Menu::displayVisualSchedule(const Student &student) const {
     waitForEnter();
 }
 
-UcClassRef Menu::chooseStudentClassMenu(const Student& student) {
+UcClassRef Window::chooseStudentClassMenu(const Student& student) {
     clearScreen();
     cout << '\n'
          << " ┌─ Choose the student class ────────────────────────────────────────────────────────────┐\n"
@@ -643,11 +645,11 @@ UcClassRef Menu::chooseStudentClassMenu(const Student& student) {
     int option = receiveOption((int)classes.size());
     for (i = 1; i < option; i++)
         it++;
-    vector<UcClass>& uc_classes = dataset_.getUcClasses();
-    return equal_range(uc_classes.begin(), uc_classes.end(), **it).first;
+    const vector<UcClass>& uc_classes = dataset_.getUcClasses();
+    return dataset_.findUcClass((*it)->getUcCode(), (*it)->getClassCode());
 }
 
-string Menu::chooseUcMenu() const {
+string Window::chooseUcMenu() const {
     clearScreen();
     cout << '\n'
          << " ┌─ Choose an UC ────────────────────────────────────────────────────────────────────────┐\n"
@@ -664,7 +666,7 @@ string Menu::chooseUcMenu() const {
     return uc_codes[receiveOption((int)uc_codes.size()) - 1];
 }
 
-UcClassConstRef Menu::chooseClassMenu(const string& uc_code) const {
+UcClassConstRef Window::chooseClassMenu(const string& uc_code) const {
     clearScreen();
     cout << '\n'
          << " ┌─ Choose a class ──────────────────────────────────────────────────────────────────────┐\n"
@@ -681,7 +683,7 @@ UcClassConstRef Menu::chooseClassMenu(const string& uc_code) const {
     return classes[receiveOption((int)classes.size()) - 1];
 }
 
-UcClassRef Menu::chooseClassMenu(const string& uc_code) {
+UcClassRef Window::chooseClassMenu(const string& uc_code) {
     clearScreen();
     cout << '\n'
          << " ┌─ Choose a class ──────────────────────────────────────────────────────────────────────┐\n"
@@ -698,7 +700,7 @@ UcClassRef Menu::chooseClassMenu(const string& uc_code) {
     return classes[receiveOption((int)classes.size()) - 1];
 }
 
-string Menu::chooseClassWithYearMenu() const {
+string Window::chooseClassWithYearMenu() const {
     int year;
     vector<string> class_codes;
     cout << "Please insert the year: ";
@@ -735,7 +737,7 @@ string Menu::chooseClassWithYearMenu() const {
     return class_codes[receiveOption((int)class_codes.size()) - 1];
 }
 
-int Menu::receiveOption(int max) {
+int Window::receiveOption(int max) {
     int option;
     cout << "Please choose an option: ";
     while (!(cin >> option) || option <= 0 || option > max) {
@@ -746,39 +748,39 @@ int Menu::receiveOption(int max) {
     return option;
 }
 
-bool Menu::confirm() {
+bool Window::confirm() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "Proceed? [Y/N]: ";
     return toupper(getchar()) == 'Y';
 }
 
-void Menu::waitForEnter() {
+void Window::waitForEnter() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "Press ENTER to continue...";
     getchar();
 }
 
 
-void Menu::searchStudentByCode() const {
+void Window::searchStudentByCode() const {
     StudentRef student = receiveStudentCode();
     displayStudent(*student);
 }
 
-void Menu::searchStudentByUc() const {
+void Window::searchStudentByUc() const {
     string uc_code = chooseUcMenu();
     vector<Student> students_in_uc = dataset_.searchStudentsInUC(uc_code);
     sortMenu(students_in_uc);
     displayStudentsNameAndCode(students_in_uc);
 }
 
-void Menu::searchStudentsByClass() const {
+void Window::searchStudentsByClass() const {
     string class_code = chooseClassWithYearMenu();
     vector<Student> students_in_class = dataset_.searchStudentsInClass(class_code);
     sortMenu(students_in_class);
     displayStudentsNameAndCode(students_in_class);
 }
 
-void Menu::searchStudentInAtLeastNUcs() const {
+void Window::searchStudentInAtLeastNUcs() const {
     int n;
     cout << "Please enter the minimum number of UCs: ";
     while (!(cin >> n)) {
@@ -791,7 +793,7 @@ void Menu::searchStudentInAtLeastNUcs() const {
     displayStudentsNameAndCode(students_in_at_least_n_ucs);
 }
 
-void Menu::searchStudentsByAdmissionYear() const {
+void Window::searchStudentsByAdmissionYear() const {
     int year;
     cout << "Please insert the year: ";
     while (!(cin >> year)) {
@@ -804,7 +806,7 @@ void Menu::searchStudentsByAdmissionYear() const {
     displayStudentsNameAndCode(students_by_year);
 }
 
-void Menu::searchStudentsByAcademicYear() const{
+void Window::searchStudentsByAcademicYear() const{
     int year;
     cout << "Please insert the year: ";
     while (!(cin >> year)) {
@@ -817,7 +819,7 @@ void Menu::searchStudentsByAcademicYear() const{
     displayStudentsNameAndCode(students_by_academic_year);
 }
 
-void Menu::searchStudentsInUcClass() const {
+void Window::searchStudentsInUcClass() const {
     string uc_code = chooseUcMenu();
     auto uc_class = chooseClassMenu(uc_code);
     vector<Student> students_in_uc_class = dataset_.searchStudentsByUcClass(*uc_class);
@@ -825,14 +827,14 @@ void Menu::searchStudentsInUcClass() const {
     displayStudentsNameAndCode(students_in_uc_class);
 }
 
-void Menu::displayStudents() const {
+void Window::displayStudents() const {
     set<Student> students_set = dataset_.getStudents();
     vector<Student> students_vec(students_set.begin(), students_set.end());
     sortMenu(students_vec);
     displayStudentsNameAndCode(students_vec);
 }
 
-void Menu::displayClassesInUc() const {
+void Window::displayClassesInUc() const {
     string uc_code = chooseUcMenu();
     vector<UcClassRef> classes = dataset_.getClassesByUcCode(uc_code);
     if (classes.empty()) {
@@ -854,7 +856,7 @@ void Menu::displayClassesInUc() const {
     waitForEnter();
 }
 
-void Menu::displayStudent(const Student& student) const {
+void Window::displayStudent(const Student& student) const {
     clearScreen();
     cout << "\n"
          << " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
@@ -866,7 +868,7 @@ void Menu::displayStudent(const Student& student) const {
     waitForEnter();
 }
 
-void Menu::displayStudentsNameAndCode(const vector<Student>& students) const {
+void Window::displayStudentsNameAndCode(const vector<Student>& students) const {
     if (students.empty()) {
         cout << "No students where found meeting this criteria. ";
         waitForEnter();
@@ -943,7 +945,7 @@ void Menu::displayStudentsNameAndCode(const vector<Student>& students) const {
     }
 }
 
-void Menu::displayClassOccupation(const std::string &uc_code) const {
+void Window::displayClassOccupation(const std::string &uc_code) const {
     vector<UcClassRef> uc_classes = dataset_.getClassesByUcCode(uc_code);
     if (uc_classes.empty()) {
         cout << "No classes found. ";
@@ -966,7 +968,7 @@ void Menu::displayClassOccupation(const std::string &uc_code) const {
     waitForEnter();
 }
 
-void Menu::displayUcs() const {
+void Window::displayUcs() const {
     vector<string> uc_codes = dataset_.getUcCodes();
     if (dataset_.getUcClasses().empty()) {
         cout << "No UC classes found. ";
@@ -985,7 +987,7 @@ void Menu::displayUcs() const {
     waitForEnter();
 }
 
-void Menu::displayClasses() const {
+void Window::displayClasses() const {
     vector<string> class_codes = dataset_.getAllClassCodes();
     if (class_codes.empty()) {
         cout << "No classes found. ";
@@ -1062,12 +1064,12 @@ void Menu::displayClasses() const {
     }
 }
 
-void Menu::clearScreen() {
+void Window::clearScreen() {
     system("clear || cls");
 }
 
-bool Menu::leave() const {
-    if (!dataset_.getPendentRequests().empty()) {
+bool Window::leave() const {
+    if (dataset_.hasUnsavedChanges()) {
         cout << "You have pending changes. If you leave now, all changes will be lost. ";
         if (!confirm())
             return false;
