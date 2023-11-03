@@ -137,7 +137,7 @@ class Dataset {
      * @param class_code The code of the class.
      * @return A reference to the UcClass, if one is found, and getUcClasses().end() otherwise.
      */
-    UcClassRef findUcClass(const std::string& uc_code, const std::string& code_of_class);
+    UcClassRef findUcClass(const std::string& uc_code, const std::string& class_code);
 
     /**
      * @brief Find a specific UcClass based on its uc code and class code.
@@ -147,7 +147,7 @@ class Dataset {
      * @param class_code The code of the class.
      * @return A constant reference to the UcClass, if one is found, and getUcClasses().end() otherwise.
      */
-    UcClassConstRef findUcClass(const std::string& uc_code, const std::string& code_of_class) const;
+    UcClassConstRef findUcClass(const std::string& uc_code, const std::string& class_code) const;
 
     /**
      * @brief Searches for students in the dataset based on their admission year.
