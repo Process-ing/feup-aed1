@@ -13,7 +13,7 @@
 
 
 /**
- * Represents a student and its information.
+ * @brief Represents a student and its information.
  */
 class Student {
   private:
