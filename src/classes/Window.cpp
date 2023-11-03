@@ -763,6 +763,8 @@ void Window::waitForEnter() {
 
 void Window::searchStudentByCode() const {
     StudentRef student = receiveStudentCode();
+    if (student == dataset_.getStudents().end())
+        return;
     displayStudent(*student);
 }
 
