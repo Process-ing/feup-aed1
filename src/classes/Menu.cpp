@@ -52,9 +52,8 @@ void Menu::launch() {
                 saveMenu();
                 break;
             case Option::EXIT:
-                cout << "Exiting the app. ";
-                waitForEnter();
-                return;
+                if (leave())
+                    return;
         }
 
         welcome_screen_file.seekg(0);
@@ -226,16 +225,12 @@ void Menu::requestMenu() {
 
 void Menu::saveMenu() {
     queue<Request>& pendent_requests = dataset_.getPendentRequests();
-    if (pendent_requests.empty()) {
-        cout << "\nNo requests were made\n" << endl;
-        return;
-    }
-
     while (!pendent_requests.empty()) {
         performRequest(pendent_requests.front());
         pendent_requests.pop();
     }
     dataset_.saveChangesToFile();
+    cout << "All successful changes were saved. ";
     waitForEnter();
 }
 
@@ -1059,4 +1054,15 @@ void Menu::displayClasses() const {
 
 void Menu::clearScreen() {
     system("clear || cls");
+}
+
+bool Menu::leave() const {
+    if (!dataset_.getPendentRequests().empty()) {
+        cout << "You have pending changes. If you leave now, all changes will be lost. ";
+        if (!confirm())
+            return false;
+    }
+    cout << "Exiting the app. ";
+    waitForEnter();
+    return true;
 }

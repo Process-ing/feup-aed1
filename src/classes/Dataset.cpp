@@ -19,6 +19,7 @@ Dataset::Dataset() {
     readUcs();
     readClasses();
     readStudents();
+    readArchive();
 }
 
 std::set<Student> &Dataset::getStudents() {
@@ -170,22 +171,22 @@ vector<Student> Dataset::searchStudentsInClass(const string& class_code) const {
 
 void Dataset::readStudents() {
     const static string STUDENT_CLASSES_PATH = "dataset/students_classes.csv";
-    ifstream studentClassesFile(STUDENT_CLASSES_PATH);
-    if (studentClassesFile.fail()) {
+    ifstream student_classes_file(STUDENT_CLASSES_PATH);
+    if (student_classes_file.fail()) {
         ostringstream error_msg;
         error_msg << "Could not open file \"" << STUDENT_CLASSES_PATH << '"';
         throw ios_base::failure(error_msg.str());
     }
     string sstudent_code, student_name, uc_code, class_code, line;
     int student_code;
-    getline(studentClassesFile, line);
+    getline(student_classes_file, line);
     Student current_student(-1, "");
     list<UcClass*> classes;
-    while (getline(studentClassesFile, sstudent_code, ',')) {
+    while (getline(student_classes_file, sstudent_code, ',')) {
         student_code = stoi(sstudent_code);
-        getline(studentClassesFile, student_name, ',');
-        getline(studentClassesFile, uc_code, ',');
-        getline(studentClassesFile, class_code);
+        getline(student_classes_file, student_name, ',');
+        getline(student_classes_file, uc_code, ',');
+        getline(student_classes_file, class_code);
         if (current_student.getStudentCode() != student_code) {
             if (current_student.getStudentCode() != -1)
                 students_.insert(current_student);
@@ -194,6 +195,30 @@ void Dataset::readStudents() {
         auto uc_class = findUcClass(uc_code,class_code);
         current_student.getUcClasses().emplace_back(uc_class);
         max_class_capacity_ = max(max_class_capacity_, uc_class->incrementNumberOfStudents());
+    }
+}
+
+void Dataset::readArchive() {
+    const static unordered_map<string, Request::Type> STR_TO_TYPE = {
+            {"ADD", Request::ADD}, {"REMOVE", Request::REMOVE}, {"SWITCH", Request::SWITCH},
+    };
+    const static string ARCHIVE_FILEPATH = "dataset/archive.csv";
+    ifstream archive_file(ARCHIVE_FILEPATH);
+    if (archive_file.fail()) {
+        return;
+    }
+
+    string type, student_code, curr_uc_code, curr_class_code, target_uc_code, target_class_code, line;
+    getline(archive_file, line);
+    while (getline(archive_file, type, ',')) {
+        getline(archive_file, student_code);
+        getline(archive_file, curr_uc_code);
+        getline(archive_file, curr_class_code);
+        getline(archive_file, target_uc_code);
+        getline(archive_file, target_class_code);
+        UcClassRef curr_uc_class = findUcClass(curr_uc_code, curr_class_code);
+        UcClassRef target_uc_class = findUcClass(target_uc_code, target_class_code);
+        archived_requests_.emplace(STR_TO_TYPE.at(type), stoi(student_code), curr_uc_class, target_uc_class);
     }
 }
 
@@ -340,21 +365,41 @@ bool Dataset::switchBalanceDisturbance(const UcClass& from, const UcClass& dest,
     return false;
 }
 
-void Dataset::saveChangesToFile() const {
-    const static string STUDENT_CLASSES_PATH = "dataset/students_classes.csv";
-    ofstream studentClassesFile(STUDENT_CLASSES_PATH);
-    if (studentClassesFile.fail()) {
+void Dataset::saveChangesToFile() {
+    const static string STUDENT_CLASSES_FILEPATH = "dataset/students_classes.csv";
+    ofstream student_classes_file(STUDENT_CLASSES_FILEPATH);
+    if (student_classes_file.fail()) {
         ostringstream error_msg;
-        error_msg << "Could not open file \"" << STUDENT_CLASSES_PATH << '"';
+        error_msg << "Could not open file \"" << STUDENT_CLASSES_FILEPATH << '"';
         throw ios_base::failure(error_msg.str());
     }
 
-    studentClassesFile << "StudentCode,StudentName,UcCode,ClassCode\n";
+    student_classes_file << "StudentCode,StudentName,UcCode,ClassCode\n";
     for (const Student& student: students_) {
         for (UcClassConstRef uc_class: student.getUcClasses()) {
-            studentClassesFile << student.getStudentCode() << ',' << student.getStudentName() << ','
+            student_classes_file << student.getStudentCode() << ',' << student.getStudentName() << ','
                 << uc_class->getUcCode() << ',' << uc_class->getClassCode() << '\n';
         }
+    }
+
+    const static unordered_map<Request::Type, string> TYPE_TO_STR = {
+        {Request::ADD, "ADD"}, {Request::REMOVE, "REMOVE"}, {Request::SWITCH, "SWITCH"},
+    };
+    const static string ARCHIVE_FILEPATH = "dataset/archive.csv";
+    stack<Request> inverted_archive;
+    while (!archived_requests_.empty()) {
+        inverted_archive.push(archived_requests_.top());
+        archived_requests_.pop();
+    }
+    ofstream archive_file(ARCHIVE_FILEPATH);
+
+    archive_file << "Type,StudentCode,CurrentUcCode,CurrentClassCode,TargetUcCode,TargetClassCode\n";
+    while (!inverted_archive.empty()) {
+        Request request = inverted_archive.top();
+        archive_file << TYPE_TO_STR.at(request.getType()) << ',' << request.getStudentCode() << ','
+            << request.getCurrentClass()->getUcCode() << ',' << request.getCurrentClass()->getClassCode() << ','
+            << request.getTargetClass()->getUcCode() << ',' << request.getTargetClass()->getClassCode() << '\n';
+        inverted_archive.pop();
     }
 }
 

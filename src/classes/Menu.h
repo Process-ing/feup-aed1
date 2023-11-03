@@ -104,6 +104,7 @@ class Menu {
     void displayStudent(const Student& student) const;
     void displayStudents() const;
     void displayClassesInUc() const;
+    bool leave() const;
 
 private:
     /**
