@@ -52,9 +52,8 @@ void Menu::launch() {
                 saveMenu();
                 break;
             case Option::EXIT:
-                cout << "Exiting the app. ";
-                waitForEnter();
-                return;
+                if (leave())
+                    return;
         }
 
         welcome_screen_file.seekg(0);
@@ -63,7 +62,7 @@ void Menu::launch() {
 
 void Menu::searchMenu() const {
     const static string SEARCH_MENU_FILEPATH = "src/menus/search_menu.txt";
-    const static int NUM_OPTIONS = 12;
+    const static int NUM_OPTIONS = 13;
     enum Option {
         ALL_STUDENTS = 1,
         ALL_UCS = 2,
@@ -150,6 +149,7 @@ void Menu::requestMenu() {
         throw ios_base::failure(error_msg.str());
     }
 
+    clearScreen();
     cout << request_menu_file.rdbuf();
 
     string uc_code;
@@ -168,7 +168,7 @@ void Menu::requestMenu() {
             student_code = student->getStudentCode();
             uc_code = chooseUcMenu();
             target_class = chooseClassMenu(uc_code);
-            cout << "\nRequest submitted sucessfully. ";
+            cout << "\nRequest submitted successfully. ";
             waitForEnter();
             break;
         case Option::REMOVE:
@@ -178,7 +178,7 @@ void Menu::requestMenu() {
                 return;
             student_code = student->getStudentCode();
             current_class = chooseStudentClassMenu(*student);
-            cout << "\nRequest submitted sucessfully. ";
+            cout << "\nRequest submitted successfully. ";
             waitForEnter();
             break;
         case Option::SWITCH:
@@ -190,54 +190,50 @@ void Menu::requestMenu() {
             current_class = chooseStudentClassMenu(*student);
             uc_code = chooseUcMenu();
             target_class = chooseClassMenu(uc_code);
-            cout << "\nRequest submitted sucessfully. ";
+            cout << "\nRequest submitted successfully. ";
             waitForEnter();
             break;
         case Option::UNDO:
             if (dataset_.getArchivedRequests().empty()) {
-                cout << "\nNo requests to undo." << endl;
+                cout << "\nNo requests to undo. ";
                 waitForEnter();
-            }
-            else {
+            } else {
+                cout << "The last saved change will be immediately and irreversibly undone. ";
+                if (!confirm())
+                    return;
                 Request last = dataset_.getArchivedRequests().top();
                 dataset_.getArchivedRequests().pop();
                 student_code = last.getStudentCode();
-                if (last.getType() == Request::ADD) {
-                    type = Request::REMOVE;
-                    current_class = last.getTargetClass();
+                switch (last.getType()) {
+                    case Request::ADD:
+                        dataset_.removeUcClass(last.getTargetClass(), last.getStudentCode());
+                        break;
+                    case Request::REMOVE:
+                        dataset_.addUcClass(last.getCurrentClass(), last.getStudentCode());
+                        break;
+                    case Request::SWITCH:
+                        dataset_.removeUcClass(last.getTargetClass(), last.getStudentCode());
+                        dataset_.addUcClass(last.getCurrentClass(), last.getStudentCode());
                 }
-                else if (last.getType() == Request::REMOVE) {
-                    type = Request::ADD;
-                    target_class = last.getCurrentClass();
-                }
-                else if (last.getType() == Request::SWITCH) {
-                    type = Request::SWITCH;
-                    current_class = last.getTargetClass();
-                    target_class = last.getCurrentClass();
-                }
-                cout << "\nUndo was successful." << endl;
+                dataset_.saveChangesToFile();
+                cout << "\nUndo was successful. " << endl;
+                waitForEnter();
             }
-            break;
+            return;
         case Option::GO_BACK:
             return;
     }
     dataset_.getPendentRequests().emplace(type, student_code, current_class, target_class);
-    if (option != Option::UNDO)
-        dataset_.getArchivedRequests().emplace(type, student_code, current_class, target_class);
 }
 
 void Menu::saveMenu() {
     queue<Request>& pendent_requests = dataset_.getPendentRequests();
-    if (pendent_requests.empty()) {
-        cout << "\nNo requests were made\n" << endl;
-        return;
-    }
-
     while (!pendent_requests.empty()) {
         performRequest(pendent_requests.front());
         pendent_requests.pop();
     }
     dataset_.saveChangesToFile();
+    cout << "\nAll successful changes were saved. ";
     waitForEnter();
 }
 
@@ -255,7 +251,8 @@ void Menu::performRequest(const Request& request) {
                     if (!confirm())
                         return;
                 }
-                dataset_.addUcClass(request, student_code);
+                dataset_.addUcClass(request.getTargetClass(), student_code);
+                dataset_.getArchivedRequests().push(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to enter class "
                      << request.getTargetClass()->getUcCode() << '-' << request.getTargetClass()->getClassCode() << ": "
@@ -271,7 +268,8 @@ void Menu::performRequest(const Request& request) {
                     if (!confirm())
                         return;
                 }
-                dataset_.removeUcClass(request, student_code);
+                dataset_.removeUcClass(request.getCurrentClass(), student_code);
+                dataset_.getArchivedRequests().push(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to leave class "
                      << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode() << ": "
@@ -290,8 +288,9 @@ void Menu::performRequest(const Request& request) {
                         return;
                 }
 
-                dataset_.removeUcClass(request, student_code);
-                dataset_.addUcClass(request, student_code);
+                dataset_.removeUcClass(request.getCurrentClass(), student_code);
+                dataset_.addUcClass(request.getTargetClass(), student_code);
+                dataset_.getArchivedRequests().push(request);
             } else {
                 cout << "Student named " << student.getStudentName() << " failed to go from class "
                      << request.getCurrentClass()->getUcCode() << '-' << request.getCurrentClass()->getClassCode()
@@ -367,12 +366,13 @@ StudentRef Menu::receiveStudentCode() const {
 
 void Menu::chooseScheduleMenu() const {
     const static string CHOOSE_SCHEDULE_FILEPATH = "src/menus/choose_schedule_menu.txt";
-    const static int NUM_OPTIONS = 4;
+    const static int NUM_OPTIONS = 5;
     enum Option {
         STUDENT_DIAGRAM = 1,
         STUDENT_VISUAL = 2,
         CLASS_DIAGRAM = 3,
         CLASS_VISUAL = 4,
+        GO_BACK = 5,
     };
 
     clearScreen();
@@ -404,6 +404,9 @@ void Menu::chooseScheduleMenu() const {
             break;
         case Option::CLASS_VISUAL:
             displayVisualSchedule(chooseClassWithYearMenu());
+            break;
+        case Option::GO_BACK:
+            return;
     }
 }
 
@@ -637,7 +640,8 @@ UcClassRef Menu::chooseStudentClassMenu(const Student& student) {
     cout << " │                                                                                       │\n"
          << " └───────────────────────────────────────────────────────────────────────────────────────┘\n\n";
     auto it = classes.begin();
-    for (i = receiveOption((int)classes.size()); i > 1; i++)
+    int option = receiveOption((int)classes.size());
+    for (i = 1; i < option; i++)
         it++;
     vector<UcClass>& uc_classes = dataset_.getUcClasses();
     return equal_range(uc_classes.begin(), uc_classes.end(), **it).first;
@@ -837,6 +841,7 @@ void Menu::displayClassesInUc() const {
         return;
     }
 
+    clearScreen();
     cout << "\n"
             " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
             " │                                                                                       │\n";
@@ -946,6 +951,7 @@ void Menu::displayClassOccupation(const std::string &uc_code) const {
         return;
     }
 
+    clearScreen();
     cout << "\n"
             " ┌─ Search results ──────────────────────────────────────────────────────────────────────┐\n"
             " │                                                                                       │\n";
@@ -1058,4 +1064,15 @@ void Menu::displayClasses() const {
 
 void Menu::clearScreen() {
     system("clear || cls");
+}
+
+bool Menu::leave() const {
+    if (!dataset_.getPendentRequests().empty()) {
+        cout << "You have pending changes. If you leave now, all changes will be lost. ";
+        if (!confirm())
+            return false;
+    }
+    cout << "Exiting the app. ";
+    waitForEnter();
+    return true;
 }

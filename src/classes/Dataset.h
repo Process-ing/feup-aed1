@@ -107,17 +107,17 @@ public:
     std::vector<Student> searchStudentsInClass(const std::string& class_code) const;
 
     void readStudents();
+    void readArchive();
 
-    void perform(const Request& request);
     bool canAdd(const Request& request, std::string& message) const;
     bool canRemove(const Request& request, std::string& message) const;
     bool canSwitch(const Request& request, std::string& message) const;
-    void addUcClass(const Request& request, int student_code);
-    void removeUcClass(const Request& request, int student_code);
+    void addUcClass(UcClassRef uc_class, int student_code);
+    void removeUcClass(UcClassRef uc_class, int student_code);
     bool addBalanceDisturbance(const UcClass& uc_class) const;
     bool removeBalanceDisturbance(const UcClass& uc_class) const;
     bool switchBalanceDisturbance(const UcClass& from, const UcClass& dest, std::string& problem_uc_code) const;
-    void saveChangesToFile() const;
+    void saveChangesToFile();
 
     bool isClassFull(const UcClass& uc_class) const;
     std::vector<UcClassConstRef> getClassesInUc(const std::string& uc_code) const;

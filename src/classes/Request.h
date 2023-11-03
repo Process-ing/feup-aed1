@@ -25,7 +25,7 @@ public:
     enum Type {
         ADD,
         REMOVE,
-        SWITCH
+        SWITCH,
     };
 
     Request(Type type, int student_code, UcClassRef current_class, UcClassRef target_class);
