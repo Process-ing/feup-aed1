@@ -20,8 +20,8 @@ add_executable(feup-aed1 main.cpp
         src/classes/Student.cpp
         src/classes/Lesson.h
         src/classes/Lesson.cpp
-        src/classes/Menu.cpp
-        src/classes/Menu.h
+        src/classes/Window.cpp
+        src/classes/Window.h
         src/utils.cpp
         src/utils.h
 )

@@ -9,50 +9,106 @@
 
 #include <string>
 
+
+/**
+ * @brief Class that represents a lesson.
+ */
 class Lesson {
-public:
+  public:
     /**
      * @brief Represents the lesson type.
-     * @author João Mendes
-     * @details T stands for Theoretical, TP stands for Theoretical-Practical, PL stands for Practical-Laboratory.
+     * T stands for Theoretical, TP stands for Theoretical-Practical, PL stands for Practical-Laboratory.
      */
     enum Type {T,TP,PL};
+
     /**
      * @brief Represents what day of the week the lesson occurs in.
-     * @author João Mendes
      */
     enum Weekday {MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY};
+
     /**
-     * @brief Constructor
-     * @author João Mendes
-     * @param start Represents the start hour.
-     * @param end Represents the end hour.
-     * @param type Represents what type of lesson it is.
+     * @brief Constructs a lesson with the given parameters.
+     *
+     * @param start Start time.
+     * @param end End time.
+     * @param type Type of lesson.
      */
     Lesson(double start, double end, Type type, Weekday weekday);
 
-    double getStart() const;
-    double getEnd() const;
-    std::string getFormattedStart() const;
-    std::string getFormattedEnd() const;
-    Type getType() const;
-    Weekday getWeekday() const;
     /**
-     * @brief Returns whether the current lesson starts before the given lesson or not.
-     * @author João Mendes
+     * @brief Returns the start time.
+     * @return Start time as a real number (of hours).
+     */
+    double getStart() const;
+
+    /**
+     * @brief Returns the end time.
+     * @return End time as a real number .
+     */
+    double getEnd() const;
+
+    /**
+     * @brief Returns the start time formatted using formatTime().
+     *
+     * @return Formatted start time.
+     */
+    std::string getFormattedStart() const;
+
+    /**
+     * @brief Returns the end time formatted using formatTime().
+     * @return Formatted end time.
+     */
+    std::string getFormattedEnd() const;
+
+    /**
+     * @brief Returns the type of the lesson.
+     * @return Lesson type
+     */
+    Type getType() const;
+
+    /**
+     * @brief Returns the weekday of the lesson.
+     * @return Lesson weekday.
+     */
+    Weekday getWeekday() const;
+
+    /**
+     * @brief Returns whether the first lesson starts before the second lesson in the week or not.
+     * Complexity: O(1)
+     *
      * @param lesson Lesson to compare
+     * @return True if the first lesson starts before the second, false otherwise
      */
     bool operator<(const Lesson &lesson) const;
+
     /**
      * @brief Returns whether the current lesson overlaps with the given lesson.
-     * @author João Mendes
+     * Complexity: O(1)
+     *
      * @param lesson Lesson to compare
+     * @return True if one overlaps with the other,
      */
     bool overlaps(const Lesson &lesson) const;
+
+    /**
+     * @brief Returns whether the current lesson can be overlapped with the other, based on their types.
+     * Two lessons can be overlapped if they are neither TP or PL.
+     * Complexity: O(1)
+     *
+     * @param lesson Lesson to compare
+     * @return True if they are compatible, false otherwise.
+     */
     bool isCompatibleWith(const Lesson& lesson) const;
 
+    /**
+     * @brief Returns the time in format HH:mm.
+     *
+     * @param time Time as real number of hours.
+     * @return Formatted time
+     */
     static std::string formatTime(double time);
-private:
+
+  private:
     double start_;
     double end_;
     Type type_;

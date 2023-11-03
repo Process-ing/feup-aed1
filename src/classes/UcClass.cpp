@@ -2,12 +2,6 @@
 
 using namespace std;
 
-UcClass::UcClass() {
-    this->uc_code_ = "";
-    this->class_code_ = "";
-    this->number_of_students_ = 0;
-}
-
 UcClass::UcClass(const string& uc_code, const string& class_code) {
     this->uc_code_ = uc_code;
     this->class_code_ = class_code;
@@ -33,10 +27,6 @@ int UcClass::getNumberOfStudents() const {
     return number_of_students_;
 }
 
-void UcClass::setNumberOfStudents(int new_number_of_students) {
-    number_of_students_ = new_number_of_students;
-}
-
 int UcClass::incrementNumberOfStudents() {
     return ++number_of_students_;
 }
@@ -51,10 +41,6 @@ vector<Lesson>& UcClass::getLessons() {
 
 const vector<Lesson>& UcClass::getLessons() const {
     return lessons_;
-}
-
-void UcClass::addLesson(Lesson lesson) {
-    lessons_.push_back(lesson);
 }
 
 bool UcClass::operator<(const UcClass& other) const {

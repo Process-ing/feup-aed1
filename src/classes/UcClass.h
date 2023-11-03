@@ -11,82 +11,114 @@
 #include <string>
 
 /**
- * @class UcClass
- * This class represents a university class within a course.
- * It provides information about the class, such as its code, day of the week, start time,
- * class type, class duration, and related student capacity.
- * The class allows for checking whether two classes overlap in terms of their schedules.
- * It also provides static methods for accessing and modifying class attributes at a class-wide level.
- *
- * @author Diogo Vieira
+ * @brief Represents an university class within a course unit.
  */
 class UcClass {
-public:
+  public:
     /**
-     * Default constructor for UcClass
-     * @author Diogo Vieira
-     */
-     UcClass();
-
-    /**
-    * Parameterized constructor for UcClass
-    * @param uc_code
-    * @param class_code
-    * @author Diogo Vieira
+    * @brief Constructs an UcClass instance with no lessons.
+    *
+    * @param uc_code Code of the UC.
+    * @param class_code Code of the class.
     */
     UcClass(const std::string& uc_code, const std::string& class_code);
 
     /**
-     * Parameterized constructor for UcClass
-     * @param uc_code
-     * @param class_codecodeOfClass
-     * @param lessons
-     * @author Diogo Vieira
+     * @brief Constructs an UcClass instance.
+     *
+     * @param uc_code Code of the UC.
+     * @param class_code Code of the class.
+     * @param lessons Lessons of the class.
      */
     UcClass(const std::string& uc_code, const std::string& class_code, const std::vector<Lesson>& lessons);
+
+    /**
+     * @brief Returns the UC code.
+     * @return UC code.
+     */
     std::string getUcCode() const;
+
+    /**
+     * @brief Returns the class code.
+     * @return Class code.
+     */
     std::string getClassCode() const;
+
+    /**
+     * @brief Returns the lessons of the class.
+     * Complexity: O(1)
+     * @return Vector of the class' lessons, sorted by start time.
+     */
     std::vector<Lesson>& getLessons();
+
+    /**
+     * @brief Returns the lessons of the class.
+     * Complexity: O(1)
+     * @return Vector of the class' lessons, sorted by start time.
+     */
     const std::vector<Lesson>& getLessons() const;
+
+    /**
+     * @brief Returns the class' academic year, based on its class code.
+     * Complexity: O(1)
+     * @return Academic year.
+     */
+    int getAcademicYear() const;
+
+    /**
+     * @brief Returns the number of students enrolled in the class.
+     * Complexity: O(1)
+     * @return Number of students.
+     */
     int getNumberOfStudents() const;
-    void setNumberOfStudents(int new_number_of_students);
+
+    /**
+     * @brief Increments the number of students by one.
+     * Complexity: O(1)
+     * @return New number of students.
+     */
     int incrementNumberOfStudents();
+
+    /**
+     * @brief Decrements the number of students by one.
+     * Complexity: O(1)
+     * @return New number of students.
+     */
     int decrementNumberOfStudents();
+
     /**
-      * @brief Add a Lesson to this UcClass.
-      * Adds a Lesson to the collection of lessons associated with this UcClass.
-      * @param lesson The Lesson to be added to this UcClass.
-      * @author Diogo Vieira
-      */
-    void addLesson(Lesson lesson);
-    /**
-    * @brief Less-than comparison operator for UcClass objects.
-    * This operator overloads the '<' operator to compare two UcClass objects based on their `uc_code` and `class_code`.
-    * @param other The UcClass object to compare with.
-    * @return True if this UcClass's `uc_code_` is less than the `uc_code_` of the other UcClass, false otherwise.
-    * @author Diogo Vieira
-    */
+     * @brief Compares two UcClass objects lexicographically by UC code and class code.
+     * @return True if the first is less than the second, false otherwise.
+     */
     bool operator<(const UcClass& other) const;
+
     /**
-     * @brief Equality operator for UcClass objects.
-     * This operator overloads the '==' operator to compare two UcClass objects based on their `uc_code` and
-     * `class_code`.
-     * @param other The UcClass object to compare with.
-     * @return True if this UcClass's `uc_code_` is equal to the `uc_code_` of the other UcClass, false otherwise.
-     * @author Diogo Vieira
+     * @brief Checks if two UcClass objects are equal, based on their UC code and class code.
+     * @return True if the two are equal, false otherwise.
      */
     bool operator==(const UcClass& other) const;
+
+    /**
+     * @brief Checks if two UcClass objects are different, based on their UC code and class code.
+     * @return True if the two are distinct, false otherwise.
+     */
     bool operator!=(const UcClass& other) const;
 
-    int getAcademicYear() const;
-private:
+  private:
     std::string uc_code_;
     std::string class_code_;
     std::vector<Lesson> lessons_;
     int number_of_students_;
 };
 
+/**
+ * @brief Reference to an UcClass instance in the dataset.
+ */
 typedef std::vector<UcClass>::iterator UcClassRef;
+
+/**
+ * @brief Constant reference to an UcClass instance in the dataset.
+ */
 typedef std::vector<UcClass>::const_iterator UcClassConstRef;
 
 #endif

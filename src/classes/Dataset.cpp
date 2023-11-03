@@ -20,18 +20,11 @@ Dataset::Dataset() {
     readClasses();
     readStudents();
     readArchive();
-}
-
-std::set<Student> &Dataset::getStudents() {
-    return students_;
+    has_unsaved_changes_ = false;
 }
 
 const set<Student>& Dataset::getStudents() const {
     return students_;
-}
-
-std::vector<UcClass> &Dataset::getUcClasses() {
-    return uc_classes_;
 }
 
 const vector<UcClass>& Dataset::getUcClasses() const {
@@ -56,7 +49,6 @@ void Dataset::readUcs() {
         getline(classes_per_uc_file, class_code);
         uc_classes_.emplace_back(uc_code, class_code);
     }
-    sort(uc_classes_.begin(), uc_classes_.end());
 }
 
 void Dataset::readClasses() {
@@ -218,30 +210,46 @@ void Dataset::readArchive() {
         getline(archive_file, target_class_code);
         UcClassRef curr_uc_class = findUcClass(curr_uc_code, curr_class_code);
         UcClassRef target_uc_class = findUcClass(target_uc_code, target_class_code);
-        archived_requests_.emplace(STR_TO_TYPE.at(type), stoi(student_code), curr_uc_class, target_uc_class);
+        request_archive_.emplace_back(STR_TO_TYPE.at(type), stoi(student_code), curr_uc_class, target_uc_class);
     }
 }
 
-queue<Request>& Dataset::getPendentRequests() {
-    return pendent_requests_;
+Request Dataset::popPendentRequest() {
+    Request request = pendent_requests_.front();
+    pendent_requests_.pop();
+    has_unsaved_changes_ = true;
+    return request;
+}
+
+void Dataset::pushPendentRequest(const Request& request) {
+    pendent_requests_.push(request);
+    has_unsaved_changes_ = true;
 }
 
 const queue<Request>& Dataset::getPendentRequests() const {
     return pendent_requests_;
 }
 
-stack<Request>& Dataset::getArchivedRequests() {
-    return archived_requests_;
+Request Dataset::popArchivedRequest() {
+    Request request = request_archive_.back();
+    request_archive_.pop_back();
+    has_unsaved_changes_ = true;
+    return request;
 }
 
-const stack<Request>& Dataset::getArchivedRequests() const {
-    return archived_requests_;
+void Dataset::pushArchivedRequest(const Request &request) {
+    request_archive_.push_back(request);
+    has_unsaved_changes_ = true;
+}
+
+const deque<Request>& Dataset::getArchivedRequests() const {
+    return request_archive_;
 }
 
 bool Dataset::canAdd(const Request& request, string& message) const {
     const Student& student = *searchStudentByCode(request.getStudentCode());
     for (auto l : request.getTargetClass()->getLessons()) {
-        if (student.lessonsOverlapsWith(l)) {
+        if (student.lessonsIncompatibleWith(l)) {
             message = "Has lessons that are not compatible with class "
                 + request.getTargetClass()->getClassCode() + " lessons";
             return false;
@@ -270,6 +278,7 @@ void Dataset::addUcClass(UcClassRef uc_class, int student_code) {
     students_.erase(old_ref);
     students_.insert(student_ref, new_student);
     uc_class->incrementNumberOfStudents();
+    has_unsaved_changes_ = true;
 }
 
 void Dataset::removeUcClass(UcClassRef uc_class, int student_code) {
@@ -281,6 +290,7 @@ void Dataset::removeUcClass(UcClassRef uc_class, int student_code) {
     students_.erase(old_ref);
     students_.insert(student_ref, new_student);
     uc_class->decrementNumberOfStudents();
+    has_unsaved_changes_ = true;
 }
 
 bool Dataset::canRemove(const Request& request, string& message) const {
@@ -305,7 +315,7 @@ bool Dataset::canSwitch(const Request& request, string& message) const {
         return false;
     }
     for (auto l : request.getTargetClass()->getLessons()) {
-        if (student.lessonsOverlapsWith(l, *request.getCurrentClass())) {
+        if (student.lessonsIncompatibleWith(l, *request.getCurrentClass())) {
             message = "Has lessons that are not compatible with class "
                       + request.getTargetClass()->getClassCode() + " lessons";
             return false;
@@ -386,37 +396,23 @@ void Dataset::saveChangesToFile() {
         {Request::ADD, "ADD"}, {Request::REMOVE, "REMOVE"}, {Request::SWITCH, "SWITCH"},
     };
     const static string ARCHIVE_FILEPATH = "dataset/archive.csv";
-    stack<Request> archive_copy(archived_requests_);
-    stack<Request> inverted_archive;
-    while (!archive_copy.empty()) {
-        inverted_archive.push(archive_copy.top());
-        archive_copy.pop();
-    }
     ofstream archive_file(ARCHIVE_FILEPATH);
 
     archive_file << "Type,StudentCode,CurrentUcCode,CurrentClassCode,TargetUcCode,TargetClassCode\n";
-    while (!inverted_archive.empty()) {
-        Request request = inverted_archive.top();
+    for (const Request& request: request_archive_) {
         archive_file << TYPE_TO_STR.at(request.getType()) << ',' << request.getStudentCode() << ','
             << request.getCurrentClass()->getUcCode() << ',' << request.getCurrentClass()->getClassCode() << ','
             << request.getTargetClass()->getUcCode() << ',' << request.getTargetClass()->getClassCode() << '\n';
-        inverted_archive.pop();
     }
+    has_unsaved_changes_ = false;
+}
+
+bool Dataset::hasUnsavedChanges() const {
+    return has_unsaved_changes_;
 }
 
 bool Dataset::isClassFull(const UcClass& uc_class) const {
     return uc_class.getNumberOfStudents() == max_class_capacity_;
-}
-
-vector<Lesson> Dataset::getStudentLessons(const Student &student) const {
-    vector<Lesson> res, temp;
-    for (UcClassConstRef uc_class: student.getUcClasses()) {
-        const vector<Lesson>& class_lessons = uc_class->getLessons();
-        merge(res.begin(), res.end(), class_lessons.begin(), class_lessons.end(), temp.begin());
-        res = temp;
-        temp.clear();
-    }
-    return res;
 }
 
 vector<UcClassConstRef> Dataset::getUcClassesByClassCode(const string &class_code) const {
